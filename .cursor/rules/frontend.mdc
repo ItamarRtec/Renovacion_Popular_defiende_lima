@@ -1,0 +1,44 @@
+---
+description: Estándares de frontend Defiende Lima — visual north star https://x.ai
+alwaysApply: true
+---
+
+# Defiende Lima — Frontend Standards
+
+## Producto
+
+Iniciativa ciudadana Lima 2026: coordina **personeros**, **miembros de mesa** y **ciudadanos** para contar cada voto.
+
+Stack: **Next.js App Router + React + TypeScript + Tailwind v4** en `front_end/`.
+
+## Visual north star
+
+**Referencia obligatoria: [https://x.ai](https://x.ai)**
+
+Antes de UI nueva, abrir x.ai y la paleta local `/design-system`. Replicar la *sensación* (no copiar copy ni marca xAI):
+
+- Canvas negro puro, tipografía blanca, secundarios `#888`
+- Nav: logo/marca izq · links centro · CTA outline + CTA blanco der
+- Hero centrado: badge `Nuevo` → **Defiende Lima** (brand) → subtítulo → lede → 2 CTAs pill
+- Underline gradient solo en la **palabra clave** del subtítulo
+- Tipografía: stack **Apple** (`-apple-system` / SF Pro) + **Geist Mono** (datos)
+- Landing en `/` (`Hero` + `SiteHeader` + `ComoFunciona`); registro en `/unirme`; paleta en `/design-system`
+
+## Tokens
+
+Fuente: `src/app/globals.css` (`--dl-*`, `.dl-*`). No hex sueltos en JSX salvo demos de paleta.
+
+## Código
+
+- Server Components por defecto; `"use client"` solo si hace falta
+- Extraer React component cuando `.dl-*` se use en >1 ruta
+- Código en inglés; copy UI en español; sin `any`; alias `@/*`
+- **Backend:** Supabase en `../supabase/` (fuera de `front_end/`). Cliente en `src/lib/supabase/`. Nunca commitear service role key ni `.env.local`.
+
+## Flujo
+
+1. Mirar x.ai + paleta `/design-system`
+2. Una sección = un propósito + título + lede
+3. Tokens existentes; si faltan, documentarlos en la paleta
+4. Schema nuevo → migración en `supabase/migrations/`
+5. `npm run lint`

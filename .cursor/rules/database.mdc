@@ -1,0 +1,34 @@
+---
+description: Supabase/DB — nunca modificar datos; schema solo en migraciones modulares
+alwaysApply: true
+---
+
+# Base de datos (Supabase)
+
+## Datos (contenido)
+
+- **NUNCA** insertar, actualizar, borrar ni “limpiar” filas en la base.
+- **NUNCA** usar `execute_sql` / MCP / scripts para mutar datos de producción o desarrollo compartido (`INSERT`, `UPDATE`, `DELETE`, `TRUNCATE`, `UPSERT`, seed masivo).
+- Leer datos solo si el usuario lo pide explícitamente (diagnóstico). No alterar lo leído.
+
+## Estructura (schema)
+
+- **SÍ** se puede cambiar la estructura: tablas, columnas, índices, enums, RLS, triggers, funciones.
+- Todo cambio de schema va en **migraciones modulares** (un archivo / un módulo de cambio), nunca un “dump” monolítico mezclado con datos.
+- Preferir `apply_migration` (DDL) sobre SQL suelto para cambios estructurales.
+- Nombrar migraciones por propósito, p. ej. `add_registros_distrito_idx`, `add_afiliado_rp_column`.
+- No reescribir migraciones ya aplicadas en remoto; agregar una migración nueva.
+
+## Módulos
+
+Organizar cambios por dominio/módulo, por ejemplo:
+
+- `registros` — inscripción de personeros
+- futuras: `capacitacion`, `asignaciones`, `actas`
+
+Cada migración toca **un** concern claro. Si hace falta schema + app, primero migración modular, luego código.
+
+## Front / env
+
+- No commitear service role key ni secretos.
+- El frontend solo usa anon/publishable key para operaciones públicas definidas por RLS.
