@@ -1,35 +1,26 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { RegistroForm } from "@/components/registro-form";
 import { BRANDS } from "@/lib/brands";
 
-const brand = BRANDS.renovacion_popular_claro;
+const brand = BRANDS.defiende_lima;
 
 export const metadata: Metadata = {
-  title: "Registro de Personeros de Mesa — Renovación Popular",
+  title: "Registro de Personeros de Mesa — Defiende Lima",
   description:
-    "Regístrate como personero de mesa con Renovación Popular.",
+    "Registro de personeros de mesa para Defiende Lima 2026.",
 };
 
-export default function RpClaroUnirmePage() {
+export default function DlUnirmePage() {
   return (
-    <main className={`${brand.themeClass} flex-1`}>
+    <main className="flex-1">
       <header className="dl-nav">
         <div className="dl-container flex h-[3.25rem] items-center justify-between gap-4">
           <Link
-            className="inline-flex items-center gap-2 text-[13px] font-semibold tracking-tight"
+            className="text-[13px] font-semibold tracking-tight text-white"
             href={brand.homeHref}
           >
-            <Image
-              src={brand.logoSrc}
-              alt={brand.logoAlt}
-              width={28}
-              height={28}
-              className="h-7 w-7 object-contain"
-              priority
-            />
-            <span className="hidden text-[#1077A1] sm:inline">{brand.name}</span>
+            {brand.name}
           </Link>
           <Link className="dl-nav-link" href={brand.howHref}>
             Cómo funciona
@@ -45,7 +36,7 @@ export default function RpClaroUnirmePage() {
           </h1>
           <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
             Completa tus datos. Luego te capacitamos, te asignamos mesa y
-            defiendes el voto con Renovación Popular.
+            defiendes el voto contigo.
           </p>
         </div>
 

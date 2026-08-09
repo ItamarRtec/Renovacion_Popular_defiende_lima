@@ -63,7 +63,7 @@ export function ComoFunciona() {
                   {number}
                 </span>
                 <div>
-                  <h3 className="text-lg font-semibold tracking-tight text-white sm:text-xl">
+                  <h3 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
                     <span className="sr-only">{index + 1}. </span>
                     {step.title}
                   </h3>

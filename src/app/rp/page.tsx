@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RenovacionPopularPage() {
   return (
-    <main className={`${brand.themeClass} flex-1`}>
+    <main className="flex-1">
       <SiteHeader brand={brand} />
       <Hero brand={brand} />
       <ComoFunciona />

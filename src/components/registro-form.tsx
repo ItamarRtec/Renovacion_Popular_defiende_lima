@@ -3,23 +3,20 @@
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { Chevron } from "@/components/icons/chevron";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type {
-  ParticipacionRol,
-  RegistroOrigen,
-} from "@/lib/supabase/database.types";
+import { Turnstile, turnstileConfigured } from "@/components/turnstile";
+import type { RegistroOrigen } from "@/lib/supabase/database.types";
 import {
   PROVINCIAS_POR_REGION,
   REGIONES,
   distritosDe,
 } from "@/lib/ubicacion";
 
-const DEFAULT_ROLE: ParticipacionRol = "personero";
-
 type RegistroFormProps = {
   origen?: RegistroOrigen;
   homeHref?: string;
 };
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function readTrimmed(form: FormData, key: string) {
   return String(form.get(key) ?? "").trim();
@@ -37,9 +34,14 @@ export function RegistroForm({
   const [experienciaPersonero, setExperienciaPersonero] = useState<
     "si" | "no" | ""
   >("");
+  const [consentimiento, setConsentimiento] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaNonce, setCaptchaNonce] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const captchaRequired = turnstileConfigured();
 
   const provincias = useMemo(
     () => (region ? (PROVINCIAS_POR_REGION[region] ?? []) : []),
@@ -50,87 +52,96 @@ export function RegistroForm({
     [region, provincia],
   );
 
+  function resetCaptcha() {
+    setCaptchaToken(null);
+    setCaptchaNonce((n) => n + 1);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError(null);
-    setSubmitting(true);
 
     const form = new FormData(event.currentTarget);
+    const nombres = readTrimmed(form, "nombres");
+    const apellidos = readTrimmed(form, "apellidos");
+    const dni = readTrimmed(form, "dni");
+    const telefono = readTrimmed(form, "telefono");
+    const email = readTrimmed(form, "email").toLowerCase();
+    const centro_votacion = readTrimmed(form, "centro_votacion");
+    const numero_mesa = readTrimmed(form, "numero_mesa");
+
     const experiencia =
       experienciaPersonero === "si"
         ? true
         : experienciaPersonero === "no"
           ? false
           : null;
-    const afiliado =
-      !isRp
-        ? null
-        : afiliadoRp === "si"
-          ? true
-          : afiliadoRp === "no"
-            ? false
-            : null;
+    const afiliado = !isRp
+      ? null
+      : afiliadoRp === "si"
+        ? true
+        : afiliadoRp === "no"
+          ? false
+          : null;
 
-    if (experiencia === null) {
-      setError("Indica si tienes experiencia previa como personero.");
-      setSubmitting(false);
-      return;
-    }
+    // Validación de cliente (el servidor revalida igualmente).
+    if (nombres.length < 2) return setError("Ingresa tus nombres.");
+    if (apellidos.length < 2) return setError("Ingresa tus apellidos.");
+    if (!/^\d{8}$/.test(dni)) return setError("El DNI debe tener 8 dígitos.");
+    if (telefono.replace(/\D/g, "").length < 9)
+      return setError("Ingresa un celular válido (9 dígitos).");
+    if (!EMAIL_RE.test(email)) return setError("Ingresa un correo válido.");
+    if (!region) return setError("Selecciona tu región.");
+    if (!provincia) return setError("Selecciona tu provincia.");
+    if (!distrito) return setError("Selecciona tu distrito.");
+    if (experiencia === null)
+      return setError("Indica si tienes experiencia previa como personero.");
+    if (isRp && afiliado === null)
+      return setError("Indica si eres afiliado a Renovación Popular.");
+    if (!consentimiento)
+      return setError("Debes aceptar el tratamiento de tus datos para continuar.");
+    if (captchaRequired && !captchaToken)
+      return setError("Completa la verificación anti-robot.");
 
-    if (isRp && afiliado === null) {
-      setError("Indica si eres afiliado a Renovación Popular.");
-      setSubmitting(false);
-      return;
-    }
-
-    const payload = {
-      rol: DEFAULT_ROLE,
-      nombres: readTrimmed(form, "nombres"),
-      apellidos: readTrimmed(form, "apellidos"),
-      dni: readTrimmed(form, "dni"),
-      telefono: readTrimmed(form, "telefono"),
-      email: readTrimmed(form, "email").toLowerCase(),
-      region: readTrimmed(form, "region"),
-      provincia: readTrimmed(form, "provincia"),
-      distrito: readTrimmed(form, "distrito"),
-      afiliado_rp: afiliado,
-      experiencia_personero: experiencia,
-      centro_votacion: null,
-      numero_mesa: null,
-      origen,
-    };
-
+    setSubmitting(true);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: insertError } = await supabase
-        .from("registros")
-        .insert(payload);
+      const response = await fetch("/api/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombres,
+          apellidos,
+          dni,
+          telefono,
+          email,
+          region,
+          provincia,
+          distrito,
+          afiliado_rp: afiliado,
+          experiencia_personero: experiencia,
+          centro_votacion,
+          numero_mesa,
+          origen,
+          consentimiento,
+          turnstileToken: captchaToken,
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        error?: string;
+      };
 
-      if (insertError) {
-        if (insertError.code === "23505") {
-          setError("Este DNI ya está registrado.");
-        } else if (insertError.message.includes("NEXT_PUBLIC_SUPABASE")) {
-          setError(
-            "Falta configurar Supabase. Revisa front_end/.env.local (ver .env.local.example).",
-          );
-        } else {
-          setError("No pudimos guardar tu inscripción. Intenta de nuevo.");
-          console.error(insertError);
-        }
+      if (!response.ok || !payload.ok) {
+        resetCaptcha();
+        setError(payload.error ?? "No pudimos guardar tu inscripción. Intenta de nuevo.");
         return;
       }
 
       setSubmitted(true);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Error inesperado al registrar.";
-      setError(
-        message.includes("NEXT_PUBLIC_SUPABASE")
-          ? "Falta configurar Supabase. Revisa front_end/.env.local (ver .env.local.example)."
-          : "No pudimos guardar tu inscripción. Intenta de nuevo.",
-      );
       console.error(err);
+      resetCaptcha();
+      setError("No pudimos guardar tu inscripción. Intenta de nuevo.");
     } finally {
       setSubmitting(false);
     }
@@ -142,12 +153,14 @@ export function RegistroForm({
         <p className="dl-kicker">Inscripción recibida</p>
         <h2 className="dl-title mt-3 text-2xl">Gracias por unirte</h2>
         <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-          Revisaremos tu registro y te contactaremos con los siguientes pasos
-          de capacitación.
+          Registramos tus datos. Te contactaremos para la{" "}
+          <strong>capacitación</strong> y la <strong>asignación de mesa</strong>.
         </p>
-        <Link className="dl-btn dl-btn-primary mt-8" href={homeHref}>
-          Volver al inicio
-        </Link>
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <Link className="dl-btn dl-btn-primary" href={homeHref}>
+            Volver al inicio
+          </Link>
+        </div>
       </div>
     );
   }
@@ -316,6 +329,35 @@ export function RegistroForm({
             ))}
           </select>
         </div>
+
+        <div>
+          <label className="dl-label" htmlFor="centro_votacion">
+            Centro de votación
+          </label>
+          <input
+            autoComplete="off"
+            className="dl-input"
+            id="centro_votacion"
+            name="centro_votacion"
+            placeholder="Ej. I.E. 1023 San Martín"
+            type="text"
+          />
+        </div>
+
+        <div>
+          <label className="dl-label" htmlFor="numero_mesa">
+            Número de mesa
+          </label>
+          <input
+            autoComplete="off"
+            className="dl-input font-[family-name:var(--font-data)]"
+            id="numero_mesa"
+            inputMode="numeric"
+            name="numero_mesa"
+            placeholder="Ej. 001234"
+            type="text"
+          />
+        </div>
       </fieldset>
 
       {isRp ? (
@@ -332,6 +374,7 @@ export function RegistroForm({
             ).map(([value, label]) => (
               <button
                 key={value}
+                aria-pressed={afiliadoRp === value}
                 className={`dl-btn flex-1 ${
                   afiliadoRp === value ? "dl-btn-primary" : "dl-btn-secondary"
                 }`}
@@ -358,6 +401,7 @@ export function RegistroForm({
           ).map(([value, label]) => (
             <button
               key={value}
+              aria-pressed={experienciaPersonero === value}
               className={`dl-btn flex-1 ${
                 experienciaPersonero === value
                   ? "dl-btn-primary"
@@ -372,10 +416,32 @@ export function RegistroForm({
         </div>
       </fieldset>
 
-      <p className="text-xs leading-relaxed text-zinc-500">
-        Al registrarte aceptas ser contactado para capacitación y asignación.
-        Tus datos se usarán solo para esta iniciativa ciudadana.
-      </p>
+      <label className="flex items-start gap-3 text-xs leading-relaxed text-zinc-500">
+        <input
+          checked={consentimiento}
+          className="mt-0.5 h-4 w-4 shrink-0"
+          onChange={(event) => setConsentimiento(event.target.checked)}
+          type="checkbox"
+        />
+        <span>
+          Acepto el tratamiento de mis datos personales (incluida mi afiliación
+          política) para esta iniciativa ciudadana —capacitación, asignación y
+          contacto— conforme a la{" "}
+          <Link
+            className="underline underline-offset-2"
+            href="/privacidad"
+            target="_blank"
+          >
+            política de privacidad
+          </Link>
+          . Puedo ejercer mis derechos (acceso, rectificación, cancelación,
+          oposición) cuando lo desee.
+        </span>
+      </label>
+
+      {captchaRequired ? (
+        <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+      ) : null}
 
       {error ? (
         <p
@@ -388,7 +454,11 @@ export function RegistroForm({
 
       <button
         className="dl-btn dl-btn-primary w-full"
-        disabled={submitting}
+        disabled={
+          submitting ||
+          !consentimiento ||
+          (captchaRequired && !captchaToken)
+        }
         type="submit"
       >
         {submitting ? "Enviando…" : "Confirmar inscripción"}

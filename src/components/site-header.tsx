@@ -58,9 +58,9 @@ export function SiteHeader({ brand }: SiteHeaderProps) {
         <div className="flex items-center justify-end gap-2">
           <Link
             className="dl-btn dl-btn-secondary dl-btn-sm hidden sm:inline-flex"
-            href={brand.howHref}
+            href="/entrar"
           >
-            Cómo funciona
+            Entrar
           </Link>
           <Link className="dl-btn dl-btn-primary dl-btn-sm" href={brand.registerHref}>
             Unirme <Chevron />

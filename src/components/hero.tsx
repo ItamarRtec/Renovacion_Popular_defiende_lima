@@ -7,32 +7,25 @@ type HeroProps = {
 };
 
 export function Hero({ brand }: HeroProps) {
-  const titleRest =
-    brand.id === "defiende_lima" ? "para que cada voto" : "por cada voto en";
-
-  const atmosphere =
-    brand.id === "renovacion_popular_claro"
-      ? "radial-gradient(ellipse 80% 50% at 50% -10%, rgb(16 119 161 / 0.16), transparent 65%)"
-      : brand.id === "renovacion_popular"
-        ? "radial-gradient(ellipse 80% 50% at 50% -10%, rgb(16 119 161 / 0.38), transparent 65%), radial-gradient(ellipse 50% 40% at 85% 90%, rgb(1 105 138 / 0.2), transparent 55%)"
-        : "radial-gradient(ellipse 70% 45% at 50% 0%, rgb(255 255 255 / 0.045), transparent 70%)";
-
-  const isRp =
-    brand.id === "renovacion_popular" || brand.id === "renovacion_popular_claro";
-
-  const subtitleColor =
-    brand.id === "renovacion_popular_claro" ? "text-[#0b2a36]" : "text-white";
+  const isRp = brand.id === "renovacion_popular";
+  const titleRest = isRp ? "por cada voto en" : "para que cada voto";
+  const subtitleColor = isRp ? "text-[#0b2a36]" : "text-white";
 
   return (
     <section
       aria-labelledby="hero-heading"
       className="relative flex min-h-[calc(100svh-3.25rem)] items-center justify-center overflow-hidden px-4 pb-20 pt-10"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ background: atmosphere }}
-      />
+      {!isRp ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 45% at 50% 0%, rgb(255 255 255 / 0.045), transparent 70%)",
+          }}
+        />
+      ) : null}
 
       <div className="relative mx-auto flex w-full max-w-[52rem] flex-col items-center text-center">
         <Link className="dl-announce dl-animate-rise" href={brand.howHref}>
@@ -46,9 +39,7 @@ export function Hero({ brand }: HeroProps) {
           className={`dl-animate-rise mt-9 max-w-[22ch] text-[clamp(2.5rem,7vw,4.5rem)] font-semibold leading-[1.07] tracking-[-0.022em] text-balance ${subtitleColor}`}
           style={{ animationDelay: "80ms" }}
         >
-          <span
-            className={`block ${isRp ? "text-[#1077A1]" : ""}`}
-          >
+          <span className={`block ${isRp ? "text-[#1077A1]" : ""}`}>
             {brand.heroTitle}
           </span>
           <span className="block">

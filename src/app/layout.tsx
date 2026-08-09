@@ -8,9 +8,9 @@ const mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Defiende Lima",
+  title: "Renovación Popular — Plataforma",
   description:
-    "Iniciativa ciudadana para coordinar personeros, miembros de mesa y ciudadanos en las elecciones de Lima 2026. Cada voto cuenta.",
+    "Capacitación y reporte de actas para personeros de Renovación Popular.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

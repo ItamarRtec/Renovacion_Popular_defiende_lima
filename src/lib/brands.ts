@@ -1,9 +1,6 @@
 import type { RegistroOrigen } from "@/lib/supabase/database.types";
 
-export type BrandId =
-  | "defiende_lima"
-  | "renovacion_popular"
-  | "renovacion_popular_claro";
+export type BrandId = "defiende_lima" | "renovacion_popular";
 
 export type BrandConfig = {
   id: BrandId;
@@ -22,26 +19,13 @@ export type BrandConfig = {
   themeClass: string;
 };
 
-const RP_COPY = {
-  name: "Renovación Popular",
-  shortName: "RP",
-  origen: "renovacion_popular" as const,
-  logoSrc: "/brands/renovacion-popular/logo-r.png",
-  logoAlt: "Renovación Popular",
-  heroTitle: "Renovación Popular",
-  heroHighlight: "Lima.",
-  heroLede:
-    "La red de personeros, miembros de mesa y ciudadanos de Renovación Popular para contar cada voto con transparencia.",
-  announce: "Elecciones municipales · personeros RP",
-};
-
 export const BRANDS: Record<BrandId, BrandConfig> = {
   defiende_lima: {
     id: "defiende_lima",
     name: "Defiende Lima",
     shortName: "Defiende Lima",
     homeHref: "/",
-    registerHref: "/unirme",
+    registerHref: "/dl/unirme",
     howHref: "/#como-funciona",
     origen: "defiende_lima",
     logoSrc: "",
@@ -55,18 +39,19 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
   },
   renovacion_popular: {
     id: "renovacion_popular",
-    ...RP_COPY,
+    name: "Renovación Popular",
+    shortName: "RP",
     homeHref: "/rp",
-    registerHref: "/rp/unirme",
+    registerHref: "/unirme",
     howHref: "/rp#como-funciona",
+    origen: "renovacion_popular",
+    logoSrc: "/brands/renovacion-popular/logo-r.png",
+    logoAlt: "Renovación Popular",
+    heroTitle: "Renovación Popular",
+    heroHighlight: "Lima.",
+    heroLede:
+      "La red de personeros, miembros de mesa y ciudadanos de Renovación Popular para contar cada voto con transparencia.",
+    announce: "Elecciones municipales · personeros RP",
     themeClass: "theme-rp",
-  },
-  renovacion_popular_claro: {
-    id: "renovacion_popular_claro",
-    ...RP_COPY,
-    homeHref: "/rp/claro",
-    registerHref: "/rp/claro/unirme",
-    howHref: "/rp/claro#como-funciona",
-    themeClass: "theme-rp-light",
   },
 };
