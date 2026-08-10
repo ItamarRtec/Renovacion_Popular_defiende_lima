@@ -51,13 +51,23 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/rp",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/rp/unirme",
+        destination: "/unirme",
+        permanent: true,
+      },
+      {
         source: "/rp/claro",
-        destination: "/rp",
+        destination: "/",
         permanent: true,
       },
       {
         source: "/rp/claro/unirme",
-        destination: "/rp/unirme",
+        destination: "/unirme",
         permanent: true,
       },
     ];

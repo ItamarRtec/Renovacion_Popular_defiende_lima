@@ -33,9 +33,9 @@ export default function EntrarPage() {
             </Link>
             <Link
               className="text-sm text-muted hover:text-[#1077A1]"
-              href="/"
+              href="/unirme"
             >
-              Defiende Lima
+              Unirme
             </Link>
           </div>
         </header>

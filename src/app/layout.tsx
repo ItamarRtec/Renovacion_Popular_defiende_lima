@@ -8,9 +8,9 @@ const mono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Renovación Popular — Plataforma",
+  title: "Renovación Popular — Personeros",
   description:
-    "Capacitación y reporte de actas para personeros de Renovación Popular.",
+    "Regístrate como personero con Renovación Popular. Cada voto en Lima cuenta.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

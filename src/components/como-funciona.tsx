@@ -40,7 +40,8 @@ export function ComoFunciona() {
             ¿Cómo funciona?
           </h2>
           <p className="mx-auto mt-4 dl-lede">
-            Cinco pasos para sumarte a Defiende Lima y cuidar cada voto en 2026.
+            Cinco pasos para sumarte a Renovación Popular y cuidar cada voto en
+            Lima.
           </p>
         </div>
 

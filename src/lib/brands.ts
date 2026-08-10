@@ -19,12 +19,31 @@ export type BrandConfig = {
   themeClass: string;
 };
 
+/** Marca oficial en defiendelima.com (hero + registro público). */
 export const BRANDS: Record<BrandId, BrandConfig> = {
+  renovacion_popular: {
+    id: "renovacion_popular",
+    name: "Renovación Popular",
+    shortName: "RP",
+    homeHref: "/",
+    registerHref: "/unirme",
+    howHref: "/#como-funciona",
+    origen: "renovacion_popular",
+    logoSrc: "/brands/renovacion-popular/logo-r.png",
+    logoAlt: "Renovación Popular",
+    heroTitle: "Renovación Popular",
+    heroHighlight: "Lima.",
+    heroLede:
+      "La red de personeros, miembros de mesa y ciudadanos de Renovación Popular para contar cada voto con transparencia.",
+    announce: "Elecciones municipales · personeros RP",
+    themeClass: "theme-rp",
+  },
+  /** Registro interno / legado (no es el hero público). */
   defiende_lima: {
     id: "defiende_lima",
     name: "Defiende Lima",
     shortName: "Defiende Lima",
-    homeHref: "/",
+    homeHref: "/dl/unirme",
     registerHref: "/dl/unirme",
     howHref: "/#como-funciona",
     origen: "defiende_lima",
@@ -36,22 +55,5 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
       "La red más grande de personeros, miembros de mesa y ciudadanos para contar cada voto con transparencia.",
     announce: "Elecciones Lima 2026 · coordinación ciudadana",
     themeClass: "",
-  },
-  renovacion_popular: {
-    id: "renovacion_popular",
-    name: "Renovación Popular",
-    shortName: "RP",
-    homeHref: "/rp",
-    registerHref: "/unirme",
-    howHref: "/rp#como-funciona",
-    origen: "renovacion_popular",
-    logoSrc: "/brands/renovacion-popular/logo-r.png",
-    logoAlt: "Renovación Popular",
-    heroTitle: "Renovación Popular",
-    heroHighlight: "Lima.",
-    heroLede:
-      "La red de personeros, miembros de mesa y ciudadanos de Renovación Popular para contar cada voto con transparencia.",
-    announce: "Elecciones municipales · personeros RP",
-    themeClass: "theme-rp",
   },
 };
