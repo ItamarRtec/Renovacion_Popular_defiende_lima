@@ -612,6 +612,73 @@
   box-shadow: none;
 }
 
+.theme-rp .rp-mesa-card {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgb(16 119 161 / 0.22);
+  background: linear-gradient(
+    180deg,
+    rgb(16 119 161 / 0.08) 0%,
+    #ffffff 42%
+  );
+  box-shadow: 0 14px 36px rgb(16 119 161 / 0.1);
+  text-align: left;
+}
+
+.theme-rp .rp-mesa-card__head {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid rgb(16 119 161 / 0.12);
+  background: rgb(16 119 161 / 0.05);
+}
+
+.theme-rp .rp-mesa-card__body {
+  padding: 1.25rem;
+}
+
+.theme-rp .rp-mesa-card__number {
+  margin-top: 0.25rem;
+  font-family: var(--font-data), ui-monospace, monospace;
+  font-size: clamp(2.75rem, 8vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--rp-celeste);
+}
+
+.theme-rp .rp-mesa-card__meta {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgb(16 119 161 / 0.12);
+}
+
+.theme-rp .rp-porki-bubble {
+  position: relative;
+  max-width: 16rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgb(16 119 161 / 0.22);
+  background: #ffffff;
+  color: #0b2a36;
+  font-size: clamp(1.15rem, 3.5vw, 1.35rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  box-shadow: 0 8px 24px rgb(16 119 161 / 0.1);
+}
+
+.theme-rp .rp-porki-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 14px;
+  height: 14px;
+  border-right: 1px solid rgb(16 119 161 / 0.22);
+  border-bottom: 1px solid rgb(16 119 161 / 0.22);
+  background: #ffffff;
+  transform: translateX(-50%) rotate(45deg);
+}
+
 .theme-rp .dl-badge {
   background: rgb(16 119 161 / 0.08);
   border-color: rgb(16 119 161 / 0.2);

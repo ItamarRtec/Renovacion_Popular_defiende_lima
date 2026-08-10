@@ -46,20 +46,25 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
 
   return (
     <div className="mx-auto max-w-md text-center">
-      <div className="mx-auto mb-4 h-28 w-28">
-        <Image
-          src="/brands/renovacion-popular/porki.png"
-          alt=""
-          width={224}
-          height={224}
-          className="h-full w-full object-contain"
-          priority
-        />
+      <div className="mx-auto mb-2 flex flex-col items-center">
+        <h1
+          className="rp-porki-bubble mb-3"
+          aria-label="Porki dice: Eso es todo amigos."
+        >
+          Eso es todo amigos.
+        </h1>
+        <div className="h-28 w-28">
+          <Image
+            src="/brands/renovacion-popular/porki.png"
+            alt="Porki"
+            width={224}
+            height={224}
+            className="h-full w-full object-contain"
+            priority
+          />
+        </div>
       </div>
-      <p className="dl-kicker">Inscripción completa</p>
-      <h1 className="dl-title mt-3 text-[clamp(2rem,5vw,2.75rem)]">
-        Eso es todo, amigos
-      </h1>
+      <p className="dl-kicker mt-4">Inscripción completa</p>
       <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
         {draft ? (
           <>
@@ -84,33 +89,30 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       </p>
 
       {tieneMesa ? (
-        <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
-          <p className="dl-kicker">Su mesa</p>
-          <p className="mt-2 text-base leading-relaxed text-[#0b2a36]">
-            Usted es personero de la mesa{" "}
-            <strong className="text-2xl font-semibold tracking-tight text-[#1077A1] font-[family-name:var(--font-data)]">
-              {draft!.numero_mesa}
-            </strong>
-            {draft?.dni ? (
-              <>
-                {" "}
-                · DNI{" "}
-                <strong className="font-[family-name:var(--font-data)]">
-                  {draft.dni}
-                </strong>
-              </>
-            ) : null}
-            .
-          </p>
-          {draft?.centro_votacion ? (
-            <p className="mt-2 text-sm text-muted">{draft.centro_votacion}</p>
-          ) : null}
-          {draft?.distrito ? (
-            <p className="mt-1 text-sm text-muted">{draft.distrito}</p>
-          ) : null}
+        <div className="rp-mesa-card mx-auto mt-6">
+          <div className="rp-mesa-card__head">
+            <p className="dl-kicker">Su mesa</p>
+          </div>
+          <div className="rp-mesa-card__body">
+            <p className="text-sm text-muted">Usted es personero de la mesa</p>
+            <p className="rp-mesa-card__number">{draft!.numero_mesa}</p>
+            {(draft?.distrito || draft?.centro_votacion) && (
+              <div className="rp-mesa-card__meta space-y-1">
+                {draft?.distrito ? (
+                  <p className="text-sm font-medium text-white">
+                    {draft.distrito}
+                    {!draft.distrito.includes("Lima") ? ", Lima" : ""}
+                  </p>
+                ) : null}
+                {draft?.centro_votacion ? (
+                  <p className="text-sm text-muted">{draft.centro_votacion}</p>
+                ) : null}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
-        <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
+        <div className="dl-panel mx-auto mt-6 px-5 py-5 text-left">
           <p className="dl-kicker">Asignación pendiente</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Su mesa será asignada en breve. Recibirá un mensaje con ella.

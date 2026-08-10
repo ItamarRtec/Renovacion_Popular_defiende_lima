@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   title: "Sé personero — Renovación Popular",
   description:
     "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
