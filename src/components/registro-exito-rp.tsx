@@ -2,12 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Chevron } from "@/components/icons/chevron";
 import {
-  REGISTRO_EXITO_STORAGE_KEY,
   buildWhatsAppUrl,
+  clearRegistroExitoDraft,
   mensajePersoneroWhatsApp,
+  readRegistroExitoDraft,
   whatsappAsignacionE164,
   type RegistroExitoDraft,
 } from "@/lib/whatsapp";
@@ -16,34 +18,68 @@ type RegistroExitoRpProps = {
   homeHref: string;
 };
 
-function readDraftOnce(): RegistroExitoDraft | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = sessionStorage.getItem(REGISTRO_EXITO_STORAGE_KEY);
-    if (!raw) return null;
-    sessionStorage.removeItem(REGISTRO_EXITO_STORAGE_KEY);
-    const parsed = JSON.parse(raw) as RegistroExitoDraft;
-    if (parsed?.nombres && parsed?.apellidos && parsed?.dni) return parsed;
-  } catch {
-    // ignore
+function draftFromSearchParams(
+  params: URLSearchParams,
+): Partial<RegistroExitoDraft> | null {
+  const numero_mesa = params.get("mesa")?.trim() || null;
+  const rol = params.get("rol")?.trim();
+  const distrito = params.get("distrito")?.trim() || null;
+  const centro_votacion = params.get("local")?.trim() || null;
+  if (!numero_mesa && rol !== "suplente") return null;
+  return {
+    numero_mesa,
+    centro_votacion,
+    distrito,
+    rol_mesa: rol === "suplente" || rol === "titular" ? rol : null,
+  };
+}
+
+function mergeDraft(
+  stored: RegistroExitoDraft | null,
+  fromUrl: Partial<RegistroExitoDraft> | null,
+): RegistroExitoDraft | null {
+  if (!stored && !fromUrl) return null;
+  if (!stored) {
+    return {
+      nombres: "",
+      apellidos: "",
+      dni: "",
+      telefono: "",
+      numero_mesa: fromUrl?.numero_mesa ?? null,
+      centro_votacion: fromUrl?.centro_votacion ?? null,
+      distrito: fromUrl?.distrito ?? null,
+      rol_mesa: fromUrl?.rol_mesa ?? null,
+    };
   }
-  return null;
+  return {
+    ...stored,
+    numero_mesa: stored.numero_mesa || fromUrl?.numero_mesa || null,
+    centro_votacion:
+      stored.centro_votacion || fromUrl?.centro_votacion || null,
+    distrito: stored.distrito || fromUrl?.distrito || null,
+    rol_mesa: stored.rol_mesa || fromUrl?.rol_mesa || null,
+  };
 }
 
 export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
-  const [draft] = useState<RegistroExitoDraft | null>(readDraftOnce);
+  const searchParams = useSearchParams();
+  const [draft] = useState<RegistroExitoDraft | null>(() =>
+    mergeDraft(readRegistroExitoDraft(), draftFromSearchParams(searchParams)),
+  );
 
   const phone = whatsappAsignacionE164();
   const waHref = useMemo(() => {
     if (!phone) return null;
-    const text = draft
-      ? mensajePersoneroWhatsApp(draft)
-      : "Hola Rafael, me registré como personero de Renovación Popular. Quiero confirmar mi asignación y el video de capacitación.";
+    const text =
+      draft && draft.nombres && draft.dni
+        ? mensajePersoneroWhatsApp(draft)
+        : "Hola Rafael, me registré como personero de Renovación Popular. Quiero confirmar mi asignación y el video de capacitación.";
     return buildWhatsAppUrl(phone, text);
   }, [draft, phone]);
 
   const esSuplente = draft?.rol_mesa === "suplente";
   const tieneMesaTitular = Boolean(draft?.numero_mesa) && !esSuplente;
+  const tieneNombre = Boolean(draft?.nombres);
 
   return (
     <div className="mx-auto max-w-md text-center">
@@ -67,9 +103,9 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       </div>
       <p className="dl-kicker mt-4">Inscripción completa</p>
       <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
-        {draft ? (
+        {tieneNombre ? (
           <>
-            Gracias, <strong>{draft.nombres}</strong>. Ya eres personero de{" "}
+            Gracias, <strong>{draft!.nombres}</strong>. Ya eres personero de{" "}
             <strong>Renovación Popular</strong>.
           </>
         ) : (
@@ -176,7 +212,11 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       </p>
 
       <div className="mt-10 flex flex-col items-stretch gap-3">
-        <Link className="dl-btn dl-btn-primary w-full" href={homeHref}>
+        <Link
+          className="dl-btn dl-btn-primary w-full"
+          href={homeHref}
+          onClick={() => clearRegistroExitoDraft()}
+        >
           Volver al inicio
         </Link>
         {waHref ? (

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { RegistroExitoRp } from "@/components/registro-exito-rp";
 import { BRANDS } from "@/lib/brands";
 
@@ -43,7 +44,9 @@ export default function RegistroListoPage() {
 
         <main className="flex-1">
           <section className="dl-container px-4 pb-20 pt-12 sm:pt-16">
-            <RegistroExitoRp homeHref={brand.homeHref} />
+            <Suspense fallback={null}>
+              <RegistroExitoRp homeHref={brand.homeHref} />
+            </Suspense>
           </section>
         </main>
       </div>

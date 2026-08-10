@@ -8,6 +8,7 @@ import { Turnstile, turnstileConfigured } from "@/components/turnstile";
 import type { RegistroOrigen } from "@/lib/supabase/database.types";
 import {
   REGISTRO_EXITO_STORAGE_KEY,
+  registroExitoQuery,
   type RegistroExitoDraft,
 } from "@/lib/whatsapp";
 
@@ -189,9 +190,9 @@ export function RegistroForm({
             JSON.stringify(draft),
           );
         } catch {
-          // private mode / quota — la página listo funciona sin draft
+          // private mode / quota — la URL de listo lleva respaldo de mesa
         }
-        router.push(successHref);
+        router.push(`${successHref}${registroExitoQuery(draft)}`);
         return;
       }
 

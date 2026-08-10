@@ -64,3 +64,36 @@ export type RegistroExitoDraft = {
   distrito?: string | null;
   rol_mesa?: "titular" | "suplente" | null;
 };
+
+export function readRegistroExitoDraft(): RegistroExitoDraft | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(REGISTRO_EXITO_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as RegistroExitoDraft;
+    if (parsed?.nombres && parsed?.apellidos && parsed?.dni) return parsed;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+export function clearRegistroExitoDraft() {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(REGISTRO_EXITO_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+/** Query string de respaldo para /unirme/listo (solo mesa/ubicación, sin PII). */
+export function registroExitoQuery(draft: RegistroExitoDraft): string {
+  const params = new URLSearchParams();
+  if (draft.numero_mesa) params.set("mesa", draft.numero_mesa);
+  if (draft.distrito) params.set("distrito", draft.distrito);
+  if (draft.centro_votacion) params.set("local", draft.centro_votacion);
+  if (draft.rol_mesa) params.set("rol", draft.rol_mesa);
+  const q = params.toString();
+  return q ? `?${q}` : "";
+}
