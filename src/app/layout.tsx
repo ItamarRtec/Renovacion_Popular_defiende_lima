@@ -12,8 +12,23 @@ export const metadata: Metadata = {
   description:
     "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+    icon: [
+      {
+        url: "/brands/renovacion-popular/logo-r.png",
+        type: "image/png",
+        sizes: "any",
+      },
+      { url: "/favicon.ico", type: "image/x-icon", sizes: "32x32" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      {
+        url: "/brands/renovacion-popular/logo-r.png",
+        type: "image/png",
+        sizes: "180x180",
+      },
+    ],
+    shortcut: "/brands/renovacion-popular/logo-r.png",
   },
 };
 
