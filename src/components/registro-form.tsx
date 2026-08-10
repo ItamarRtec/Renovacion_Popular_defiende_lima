@@ -222,14 +222,17 @@ export function RegistroForm({
                 </strong>
               </>
             ) : null}
-            . Te contactaremos para la capacitación.
+            .
           </p>
         ) : (
           <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-            Su mesa será asignada en breve. Recibirá un mensaje con ella y los
-            siguientes pasos de capacitación.
+            Su mesa será asignada en breve. Recibirá un mensaje con ella.
           </p>
         )}
+        <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
+          Mientras tanto, espere a que <strong>Rafael López Aliaga</strong> se
+          comunique con usted.
+        </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link className="dl-btn dl-btn-primary" href={homeHref}>
             Volver al inicio

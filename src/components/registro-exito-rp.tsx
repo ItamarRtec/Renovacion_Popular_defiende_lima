@@ -108,44 +108,36 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
           {draft?.distrito ? (
             <p className="mt-1 text-sm text-muted">{draft.distrito}</p>
           ) : null}
-          <p className="mt-3 text-xs leading-relaxed text-muted">
-            Dato del padrón electoral. Confírmalo con Rafael por WhatsApp.
-          </p>
         </div>
       ) : (
         <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
           <p className="dl-kicker">Asignación pendiente</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Su mesa será asignada en breve. Recibirá un mensaje con ella y los
-            siguientes pasos. Mientras tanto, puede escribirle a Rafael López
-            Aliga por WhatsApp.
+            Su mesa será asignada en breve. Recibirá un mensaje con ella.
           </p>
         </div>
       )}
 
+      <p className="mx-auto mt-6 text-sm leading-relaxed text-muted">
+        Mientras tanto, espere a que <strong>Rafael López Aliaga</strong> se
+        comunique con usted.
+      </p>
+
       <div className="mt-10 flex flex-col items-stretch gap-3">
+        <Link className="dl-btn dl-btn-primary w-full" href={homeHref}>
+          Volver al inicio
+        </Link>
         {waHref ? (
           <a
-            className="dl-btn dl-btn-primary w-full"
+            className="dl-btn dl-btn-secondary w-full"
             href={waHref}
             rel="noopener noreferrer"
             target="_blank"
           >
-            {tieneMesa ? "Confirmar por WhatsApp" : "Escribir por WhatsApp"}
+            Escribir por WhatsApp
             <Chevron />
           </a>
-        ) : (
-          <p
-            className="rounded-[var(--radius-md)] border border-danger-500/40 bg-danger-100/40 px-4 py-3 text-sm text-danger-500"
-            role="status"
-          >
-            Falta configurar el número de WhatsApp
-            (NEXT_PUBLIC_WHATSAPP_RAFAEL).
-          </p>
-        )}
-        <Link className="dl-btn dl-btn-secondary w-full" href={homeHref}>
-          Volver al inicio
-        </Link>
+        ) : null}
       </div>
     </div>
   );
