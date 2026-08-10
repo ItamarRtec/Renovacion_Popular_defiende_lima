@@ -31,10 +31,46 @@ type RegistroFormProps = {
   placeholders?: RegistroFormLabels;
 };
 
+type MesaResult = {
+  numero_mesa?: string | null;
+  centro_votacion?: string | null;
+  distrito?: string | null;
+};
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function readTrimmed(form: FormData, key: string) {
   return String(form.get(key) ?? "").trim();
+}
+
+function MesaLoadingOverlay() {
+  return (
+    <div
+      aria-busy="true"
+      aria-live="polite"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mesa-loading-title"
+    >
+      <div className="dl-panel w-full max-w-sm px-6 py-8 text-center shadow-[0_20px_50px_rgb(0_0_0_/_0.25)]">
+        <div
+          aria-hidden
+          className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-[#1077A1]/25 border-t-[#1077A1]"
+        />
+        <h2
+          id="mesa-loading-title"
+          className="dl-title mt-5 text-xl tracking-tight"
+        >
+          Determinando su mesa
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          Consultamos el padrón electoral con su DNI. Esto puede tomar unos
+          segundos.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export function RegistroForm({
@@ -42,7 +78,7 @@ export function RegistroForm({
   homeHref = "/",
   successHref,
   ctaLabel = "Confirmar inscripción",
-  ctaPendingLabel = "Consultando tu mesa…",
+  ctaPendingLabel = "Determinando su mesa…",
   footerNote,
   labels,
   placeholders,
@@ -52,6 +88,8 @@ export function RegistroForm({
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaNonce, setCaptchaNonce] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedMesa, setSubmittedMesa] = useState<MesaResult | null>(null);
+  const [submittedDni, setSubmittedDni] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -118,11 +156,7 @@ export function RegistroForm({
       const payload = (await response.json()) as {
         ok?: boolean;
         error?: string;
-        mesa?: {
-          numero_mesa?: string | null;
-          centro_votacion?: string | null;
-          distrito?: string | null;
-        } | null;
+        mesa?: MesaResult | null;
       };
 
       if (!response.ok || !payload.ok) {
@@ -155,6 +189,8 @@ export function RegistroForm({
         return;
       }
 
+      setSubmittedDni(dni);
+      setSubmittedMesa(payload.mesa ?? null);
       setSubmitted(true);
     } catch (err) {
       console.error(err);
@@ -166,14 +202,34 @@ export function RegistroForm({
   }
 
   if (submitted) {
+    const mesa = submittedMesa?.numero_mesa?.trim();
     return (
       <div className="dl-panel mx-auto max-w-md px-6 py-10 text-center">
         <p className="dl-kicker">Inscripción recibida</p>
         <h2 className="dl-title mt-3 text-2xl">Gracias por unirte</h2>
-        <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-          Registramos tus datos. Te contactaremos para la{" "}
-          <strong>capacitación</strong> y la <strong>asignación de mesa</strong>.
-        </p>
+        {mesa ? (
+          <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
+            Usted es personero de la mesa{" "}
+            <strong className="font-[family-name:var(--font-data)] text-[#1077A1]">
+              {mesa}
+            </strong>
+            {submittedDni ? (
+              <>
+                {" "}
+                · DNI{" "}
+                <strong className="font-[family-name:var(--font-data)]">
+                  {submittedDni}
+                </strong>
+              </>
+            ) : null}
+            . Te contactaremos para la capacitación.
+          </p>
+        ) : (
+          <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
+            Su mesa será asignada en breve. Recibirá un mensaje con ella y los
+            siguientes pasos de capacitación.
+          </p>
+        )}
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link className="dl-btn dl-btn-primary" href={homeHref}>
             Volver al inicio
@@ -184,144 +240,153 @@ export function RegistroForm({
   }
 
   return (
-    <form
-      className="mx-auto w-full max-w-md space-y-5"
-      noValidate
-      onSubmit={handleSubmit}
-    >
-      <div>
-        <label className="dl-label" htmlFor="nombres">
-          {fieldLabels.nombres}
-        </label>
-        <input
-          autoComplete="given-name"
-          className="dl-input"
-          id="nombres"
-          name="nombres"
-          placeholder={fieldPlaceholders.nombres}
-          required
-          type="text"
-        />
-      </div>
-
-      <div>
-        <label className="dl-label" htmlFor="apellidos">
-          {fieldLabels.apellidos}
-        </label>
-        <input
-          autoComplete="family-name"
-          className="dl-input"
-          id="apellidos"
-          name="apellidos"
-          placeholder={fieldPlaceholders.apellidos}
-          required
-          type="text"
-        />
-      </div>
-
-      <div>
-        <label className="dl-label" htmlFor="dni">
-          {fieldLabels.dni}
-        </label>
-        <input
-          autoComplete="off"
-          className="dl-input font-[family-name:var(--font-data)]"
-          id="dni"
-          inputMode="numeric"
-          maxLength={8}
-          minLength={8}
-          name="dni"
-          pattern="[0-9]{8}"
-          placeholder={fieldPlaceholders.dni}
-          required
-          type="text"
-        />
-      </div>
-
-      <div>
-        <label className="dl-label" htmlFor="telefono">
-          {fieldLabels.telefono}
-        </label>
-        <input
-          autoComplete="tel"
-          className="dl-input font-[family-name:var(--font-data)]"
-          id="telefono"
-          inputMode="tel"
-          name="telefono"
-          placeholder={fieldPlaceholders.telefono}
-          required
-          type="tel"
-        />
-      </div>
-
-      <div>
-        <label className="dl-label" htmlFor="email">
-          {fieldLabels.email}
-        </label>
-        <input
-          autoComplete="email"
-          className="dl-input"
-          id="email"
-          name="email"
-          placeholder={fieldPlaceholders.email}
-          required
-          type="email"
-        />
-      </div>
-
-      <label className="flex items-start gap-3 text-xs leading-relaxed text-zinc-500">
-        <input
-          checked={consentimiento}
-          className="mt-0.5 h-4 w-4 shrink-0"
-          onChange={(event) => setConsentimiento(event.target.checked)}
-          type="checkbox"
-        />
-        <span>
-          Acepto el tratamiento de mis datos personales para esta iniciativa
-          ciudadana —capacitación, asignación y contacto— conforme a la{" "}
-          <Link
-            className="underline underline-offset-2"
-            href="/privacidad"
-            target="_blank"
-          >
-            política de privacidad
-          </Link>
-          . Puedo ejercer mis derechos (acceso, rectificación, cancelación,
-          oposición) cuando lo desee.
-        </span>
-      </label>
-
-      {captchaRequired ? (
-        <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
-      ) : null}
-
-      {error ? (
-        <p
-          className="rounded-[var(--radius-md)] border border-danger-500/40 bg-danger-100/40 px-4 py-3 text-sm text-danger-500"
-          role="alert"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      <button
-        className="dl-btn dl-btn-primary w-full"
-        disabled={
-          submitting ||
-          !consentimiento ||
-          (captchaRequired && !captchaToken)
-        }
-        type="submit"
+    <>
+      {submitting ? <MesaLoadingOverlay /> : null}
+      <form
+        className="mx-auto w-full max-w-md space-y-5"
+        noValidate
+        onSubmit={handleSubmit}
       >
-        {submitting ? ctaPendingLabel : ctaLabel}
-        {!submitting ? <Chevron /> : null}
-      </button>
+        <div>
+          <label className="dl-label" htmlFor="nombres">
+            {fieldLabels.nombres}
+          </label>
+          <input
+            autoComplete="given-name"
+            className="dl-input"
+            disabled={submitting}
+            id="nombres"
+            name="nombres"
+            placeholder={fieldPlaceholders.nombres}
+            required
+            type="text"
+          />
+        </div>
 
-      {footerNote ? (
-        <p className="text-center text-xs leading-relaxed text-muted">
-          {footerNote}
-        </p>
-      ) : null}
-    </form>
+        <div>
+          <label className="dl-label" htmlFor="apellidos">
+            {fieldLabels.apellidos}
+          </label>
+          <input
+            autoComplete="family-name"
+            className="dl-input"
+            disabled={submitting}
+            id="apellidos"
+            name="apellidos"
+            placeholder={fieldPlaceholders.apellidos}
+            required
+            type="text"
+          />
+        </div>
+
+        <div>
+          <label className="dl-label" htmlFor="dni">
+            {fieldLabels.dni}
+          </label>
+          <input
+            autoComplete="off"
+            className="dl-input font-[family-name:var(--font-data)]"
+            disabled={submitting}
+            id="dni"
+            inputMode="numeric"
+            maxLength={8}
+            minLength={8}
+            name="dni"
+            pattern="[0-9]{8}"
+            placeholder={fieldPlaceholders.dni}
+            required
+            type="text"
+          />
+        </div>
+
+        <div>
+          <label className="dl-label" htmlFor="telefono">
+            {fieldLabels.telefono}
+          </label>
+          <input
+            autoComplete="tel"
+            className="dl-input font-[family-name:var(--font-data)]"
+            disabled={submitting}
+            id="telefono"
+            inputMode="tel"
+            name="telefono"
+            placeholder={fieldPlaceholders.telefono}
+            required
+            type="tel"
+          />
+        </div>
+
+        <div>
+          <label className="dl-label" htmlFor="email">
+            {fieldLabels.email}
+          </label>
+          <input
+            autoComplete="email"
+            className="dl-input"
+            disabled={submitting}
+            id="email"
+            name="email"
+            placeholder={fieldPlaceholders.email}
+            required
+            type="email"
+          />
+        </div>
+
+        <label className="flex items-start gap-3 text-xs leading-relaxed text-zinc-500">
+          <input
+            checked={consentimiento}
+            className="mt-0.5 h-4 w-4 shrink-0"
+            disabled={submitting}
+            onChange={(event) => setConsentimiento(event.target.checked)}
+            type="checkbox"
+          />
+          <span>
+            Acepto el tratamiento de mis datos personales para esta iniciativa
+            ciudadana —capacitación, asignación y contacto— conforme a la{" "}
+            <Link
+              className="underline underline-offset-2"
+              href="/privacidad"
+              target="_blank"
+            >
+              política de privacidad
+            </Link>
+            . Puedo ejercer mis derechos (acceso, rectificación, cancelación,
+            oposición) cuando lo desee.
+          </span>
+        </label>
+
+        {captchaRequired ? (
+          <Turnstile key={captchaNonce} onToken={setCaptchaToken} />
+        ) : null}
+
+        {error ? (
+          <p
+            className="rounded-[var(--radius-md)] border border-danger-500/40 bg-danger-100/40 px-4 py-3 text-sm text-danger-500"
+            role="alert"
+          >
+            {error}
+          </p>
+        ) : null}
+
+        <button
+          className="dl-btn dl-btn-primary w-full"
+          disabled={
+            submitting ||
+            !consentimiento ||
+            (captchaRequired && !captchaToken)
+          }
+          type="submit"
+        >
+          {submitting ? ctaPendingLabel : ctaLabel}
+          {!submitting ? <Chevron /> : null}
+        </button>
+
+        {footerNote ? (
+          <p className="text-center text-xs leading-relaxed text-muted">
+            {footerNote}
+          </p>
+        ) : null}
+      </form>
+    </>
   );
 }

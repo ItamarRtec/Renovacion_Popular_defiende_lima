@@ -64,7 +64,17 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
         {draft ? (
           <>
             Gracias, <strong>{draft.nombres}</strong>. Ya eres personero de{" "}
-            <strong>Renovación Popular</strong>.
+            <strong>Renovación Popular</strong>
+            {draft.dni ? (
+              <>
+                {" "}
+                · DNI{" "}
+                <strong className="font-[family-name:var(--font-data)]">
+                  {draft.dni}
+                </strong>
+              </>
+            ) : null}
+            .
           </>
         ) : (
           <>
@@ -75,9 +85,22 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
 
       {tieneMesa ? (
         <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
-          <p className="dl-kicker">Tu mesa (padrón ONPE)</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-[#1077A1] font-[family-name:var(--font-data)]">
-            Mesa {draft!.numero_mesa}
+          <p className="dl-kicker">Su mesa</p>
+          <p className="mt-2 text-base leading-relaxed text-[#0b2a36]">
+            Usted es personero de la mesa{" "}
+            <strong className="text-2xl font-semibold tracking-tight text-[#1077A1] font-[family-name:var(--font-data)]">
+              {draft!.numero_mesa}
+            </strong>
+            {draft?.dni ? (
+              <>
+                {" "}
+                · DNI{" "}
+                <strong className="font-[family-name:var(--font-data)]">
+                  {draft.dni}
+                </strong>
+              </>
+            ) : null}
+            .
           </p>
           {draft?.centro_votacion ? (
             <p className="mt-2 text-sm text-muted">{draft.centro_votacion}</p>
@@ -90,10 +113,14 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
           </p>
         </div>
       ) : (
-        <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-          Aún no pudimos leer tu mesa en ONPE. Escríbele a Rafael López Aliga
-          por WhatsApp para tu asignación y el video de capacitación.
-        </p>
+        <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
+          <p className="dl-kicker">Asignación pendiente</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Su mesa será asignada en breve. Recibirá un mensaje con ella y los
+            siguientes pasos. Mientras tanto, puede escribirle a Rafael López
+            Aliga por WhatsApp.
+          </p>
+        </div>
       )}
 
       <div className="mt-10 flex flex-col items-stretch gap-3">

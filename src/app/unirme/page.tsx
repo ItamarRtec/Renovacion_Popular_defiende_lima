@@ -99,7 +99,7 @@ export default function UnirmePage() {
             <div className="mt-10">
               <RegistroForm
                 ctaLabel="Quiero ser personero"
-                ctaPendingLabel="Anotándote…"
+                ctaPendingLabel="Determinando su mesa…"
                 footerNote="Toma menos de 1 minuto. Tus datos solo se usan para este proceso."
                 homeHref={brand.homeHref}
                 labels={{
