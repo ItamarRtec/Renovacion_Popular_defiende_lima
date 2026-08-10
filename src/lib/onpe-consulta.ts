@@ -51,15 +51,19 @@ export async function consultarMesaPorDni(
   if (!base) return null;
   if (!/^\d{8}$/.test(dni)) return null;
 
-  const token = process.env.ONPE_CONSULTA_TOKEN ?? "";
+  const token = (process.env.ONPE_CONSULTA_TOKEN ?? "").trim();
+  if (!token) {
+    console.error("onpe-consulta skipped: ONPE_CONSULTA_TOKEN vacío");
+    return null;
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 55_000);
 
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      "x-consulta-token": token,
     };
-    if (token) headers["x-consulta-token"] = token;
 
     const response = await fetch(`${base}/consultar`, {
       method: "POST",

@@ -23,7 +23,7 @@ import { OnpeConsultor, ConsultaError, DniSchema, type ConsultaResultado } from 
 
 const PORT = Number(process.env.PORT ?? "8787");
 const HOST = process.env.HOST ?? "127.0.0.1";
-const TOKEN = process.env.CONSULTA_TOKEN ?? "";
+const TOKEN = (process.env.CONSULTA_TOKEN ?? "").trim();
 
 const LOOPBACK = new Set(["127.0.0.1", "::1", "localhost"]);
 const isLoopback = LOOPBACK.has(HOST);
@@ -54,7 +54,7 @@ function auth(req: express.Request): boolean {
   // Solo se permite sin token en loopback. Fuera de loopback ya exigimos
   // token al arrancar, así que aquí siempre se valida.
   if (!TOKEN) return isLoopback;
-  return tokenMatches(req.header("x-consulta-token") ?? "");
+  return tokenMatches((req.header("x-consulta-token") ?? "").trim());
 }
 
 // Rate limiting best-effort en memoria por IP (evita barridos masivos).
