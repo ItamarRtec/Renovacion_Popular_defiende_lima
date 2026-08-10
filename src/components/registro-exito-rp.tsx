@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Chevron } from "@/components/icons/chevron";
@@ -37,15 +38,27 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
     if (!phone) return null;
     const text = draft
       ? mensajePersoneroWhatsApp(draft)
-      : "Hola Rafael, me registré como personero de Renovación Popular. Quiero mi asignación de mesa y el video de capacitación.";
+      : "Hola Rafael, me registré como personero de Renovación Popular. Quiero confirmar mi asignación y el video de capacitación.";
     return buildWhatsAppUrl(phone, text);
   }, [draft, phone]);
 
+  const tieneMesa = Boolean(draft?.numero_mesa);
+
   return (
     <div className="mx-auto max-w-md text-center">
+      <div className="mx-auto mb-4 h-28 w-28">
+        <Image
+          src="/brands/renovacion-popular/porki.png"
+          alt=""
+          width={224}
+          height={224}
+          className="h-full w-full object-contain"
+          priority
+        />
+      </div>
       <p className="dl-kicker">Inscripción completa</p>
       <h1 className="dl-title mt-3 text-[clamp(2rem,5vw,2.75rem)]">
-        ¡Felicitaciones!
+        Eso es todo, amigos
       </h1>
       <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
         {draft ? (
@@ -59,11 +72,29 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
           </>
         )}
       </p>
-      <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-        El siguiente paso es escribir a Rafael López Aliga por WhatsApp. En su
-        primera respuesta te asignará tu mesa y te enviará el video de
-        capacitación.
-      </p>
+
+      {tieneMesa ? (
+        <div className="dl-panel mx-auto mt-6 px-5 py-4 text-left">
+          <p className="dl-kicker">Tu mesa (padrón ONPE)</p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight text-[#1077A1] font-[family-name:var(--font-data)]">
+            Mesa {draft!.numero_mesa}
+          </p>
+          {draft?.centro_votacion ? (
+            <p className="mt-2 text-sm text-muted">{draft.centro_votacion}</p>
+          ) : null}
+          {draft?.distrito ? (
+            <p className="mt-1 text-sm text-muted">{draft.distrito}</p>
+          ) : null}
+          <p className="mt-3 text-xs leading-relaxed text-muted">
+            Dato del padrón electoral. Confírmalo con Rafael por WhatsApp.
+          </p>
+        </div>
+      ) : (
+        <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
+          Aún no pudimos leer tu mesa en ONPE. Escríbele a Rafael López Aliga
+          por WhatsApp para tu asignación y el video de capacitación.
+        </p>
+      )}
 
       <div className="mt-10 flex flex-col items-stretch gap-3">
         {waHref ? (
@@ -73,7 +104,7 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
             rel="noopener noreferrer"
             target="_blank"
           >
-            Escribir por WhatsApp
+            {tieneMesa ? "Confirmar por WhatsApp" : "Escribir por WhatsApp"}
             <Chevron />
           </a>
         ) : (

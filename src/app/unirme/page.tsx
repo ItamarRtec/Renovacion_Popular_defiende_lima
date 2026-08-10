@@ -6,10 +6,16 @@ import { BRANDS } from "@/lib/brands";
 
 const brand = BRANDS.renovacion_popular;
 
+const PITCH = [
+  "Te capacitas con 3 videos cortos desde tu celular.",
+  "Te asignamos tu local de votación o el más cercano.",
+  "Cobras por Yape o Plin al enviar el acta.",
+] as const;
+
 export const metadata: Metadata = {
-  title: "Registro de Personeros de Mesa — Renovación Popular",
+  title: "Sé personero — Renovación Popular",
   description:
-    "Regístrate como personero de mesa con Renovación Popular.",
+    "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
 };
 
 export default function UnirmePage() {
@@ -47,20 +53,65 @@ export default function UnirmePage() {
         <main className="flex-1">
           <section className="dl-container px-4 pb-20 pt-12 sm:pt-16">
             <div className="mx-auto max-w-md text-center">
-              <p className="dl-kicker">Paso 1 · Registro</p>
-              <h1 className="dl-title mt-3 text-[clamp(2rem,5vw,2.75rem)]">
-                Registro de Personeros de Mesa
+              <div className="mx-auto mb-5 h-[5.75rem] w-[5.75rem] overflow-hidden rounded-full border-2 border-[#1077A1]/30 shadow-[0_8px_24px_rgb(16_119_161_/_0.18)]">
+                <Image
+                  src="/brands/renovacion-popular/rafael-face.png"
+                  alt="Rafael López Aliaga sonriendo"
+                  width={184}
+                  height={184}
+                  className="h-full w-full object-cover object-[50%_42%]"
+                  priority
+                />
+              </div>
+              <p className="dl-kicker">Elecciones · tu mesa cuenta</p>
+              <h1 className="dl-title mt-3 text-[clamp(2.25rem,6vw,3rem)]">
+                Sé personero.{" "}
+                <span className="dl-accent-underline">Ya.</span>
               </h1>
               <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
-                Completa tus datos. Luego escribe por WhatsApp para tu mesa y
-                el video de capacitación.
+                Si eres de Lima, Rafael te necesita en{" "}
+                <strong className="font-semibold text-[#0b2a36]">tu mesa</strong>
+                . Un día y cobras por Yape o Plin.
               </p>
             </div>
 
+            <ul className="mx-auto mt-10 grid max-w-3xl list-none grid-cols-3 gap-3 p-0 sm:gap-5">
+              {PITCH.map((phrase, index) => (
+                <li key={phrase} className="min-w-0 text-center">
+                  <span
+                    aria-hidden
+                    className="font-[family-name:var(--font-data)] text-sm font-medium tracking-tight text-[#1077A1]"
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <p className="mt-2 text-[13px] font-semibold leading-snug tracking-tight text-[#0b2a36] sm:text-sm">
+                    {phrase}
+                  </p>
+                </li>
+              ))}
+            </ul>
+
             <div className="mt-10">
               <RegistroForm
+                ctaLabel="Quiero ser personero"
+                ctaPendingLabel="Anotándote…"
+                footerNote="Toma menos de 1 minuto. Tus datos solo se usan para este proceso."
                 homeHref={brand.homeHref}
+                labels={{
+                  nombres: "Tu nombre",
+                  apellidos: "Tus apellidos",
+                  dni: "Tu DNI",
+                  telefono: "Tu celular (WhatsApp)",
+                  email: "Tu correo",
+                }}
                 origen={brand.origen}
+                placeholders={{
+                  nombres: "María Elena",
+                  apellidos: "Fernández Quispe",
+                  dni: "8 dígitos",
+                  telefono: "9 dígitos",
+                  email: "nombre@correo.com",
+                }}
                 successHref="/unirme/listo"
               />
             </div>

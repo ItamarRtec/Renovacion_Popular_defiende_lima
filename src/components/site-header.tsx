@@ -55,12 +55,7 @@ export function SiteHeader({ brand }: SiteHeaderProps) {
         </nav>
 
         <div className="flex items-center justify-end gap-2">
-          <Link
-            className="dl-btn dl-btn-secondary dl-btn-sm hidden sm:inline-flex"
-            href="/entrar"
-          >
-            Entrar
-          </Link>
+          {/* Botón "Entrar" oculto hasta habilitar el login públicamente. */}
           <Link className="dl-btn dl-btn-primary dl-btn-sm" href={brand.registerHref}>
             Unirme <Chevron />
           </Link>

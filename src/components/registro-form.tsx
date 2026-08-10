@@ -11,11 +11,24 @@ import {
   type RegistroExitoDraft,
 } from "@/lib/whatsapp";
 
+type RegistroFormLabels = {
+  nombres?: string;
+  apellidos?: string;
+  dni?: string;
+  telefono?: string;
+  email?: string;
+};
+
 type RegistroFormProps = {
   origen?: RegistroOrigen;
   homeHref?: string;
   /** Si se define, tras un alta OK navega aquí (RP: /unirme/listo). */
   successHref?: string;
+  ctaLabel?: string;
+  ctaPendingLabel?: string;
+  footerNote?: string;
+  labels?: RegistroFormLabels;
+  placeholders?: RegistroFormLabels;
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,6 +41,11 @@ export function RegistroForm({
   origen = "defiende_lima",
   homeHref = "/",
   successHref,
+  ctaLabel = "Confirmar inscripción",
+  ctaPendingLabel = "Consultando tu mesa…",
+  footerNote,
+  labels,
+  placeholders,
 }: RegistroFormProps) {
   const router = useRouter();
   const [consentimiento, setConsentimiento] = useState(false);
@@ -38,6 +56,20 @@ export function RegistroForm({
   const [error, setError] = useState<string | null>(null);
 
   const captchaRequired = turnstileConfigured();
+  const fieldLabels = {
+    nombres: labels?.nombres ?? "Nombres",
+    apellidos: labels?.apellidos ?? "Apellidos",
+    dni: labels?.dni ?? "DNI",
+    telefono: labels?.telefono ?? "Celular",
+    email: labels?.email ?? "Correo electrónico",
+  };
+  const fieldPlaceholders = {
+    nombres: placeholders?.nombres ?? "María Elena",
+    apellidos: placeholders?.apellidos ?? "Quispe Rojas",
+    dni: placeholders?.dni ?? "12345678",
+    telefono: placeholders?.telefono ?? "999 888 777",
+    email: placeholders?.email ?? "tu@correo.com",
+  };
 
   function resetCaptcha() {
     setCaptchaToken(null);
@@ -86,6 +118,11 @@ export function RegistroForm({
       const payload = (await response.json()) as {
         ok?: boolean;
         error?: string;
+        mesa?: {
+          numero_mesa?: string | null;
+          centro_votacion?: string | null;
+          distrito?: string | null;
+        } | null;
       };
 
       if (!response.ok || !payload.ok) {
@@ -102,6 +139,9 @@ export function RegistroForm({
           apellidos,
           dni,
           telefono,
+          numero_mesa: payload.mesa?.numero_mesa ?? null,
+          centro_votacion: payload.mesa?.centro_votacion ?? null,
+          distrito: payload.mesa?.distrito ?? null,
         };
         try {
           sessionStorage.setItem(
@@ -151,14 +191,14 @@ export function RegistroForm({
     >
       <div>
         <label className="dl-label" htmlFor="nombres">
-          Nombres
+          {fieldLabels.nombres}
         </label>
         <input
           autoComplete="given-name"
           className="dl-input"
           id="nombres"
           name="nombres"
-          placeholder="María Elena"
+          placeholder={fieldPlaceholders.nombres}
           required
           type="text"
         />
@@ -166,14 +206,14 @@ export function RegistroForm({
 
       <div>
         <label className="dl-label" htmlFor="apellidos">
-          Apellidos
+          {fieldLabels.apellidos}
         </label>
         <input
           autoComplete="family-name"
           className="dl-input"
           id="apellidos"
           name="apellidos"
-          placeholder="Quispe Rojas"
+          placeholder={fieldPlaceholders.apellidos}
           required
           type="text"
         />
@@ -181,7 +221,7 @@ export function RegistroForm({
 
       <div>
         <label className="dl-label" htmlFor="dni">
-          DNI
+          {fieldLabels.dni}
         </label>
         <input
           autoComplete="off"
@@ -192,7 +232,7 @@ export function RegistroForm({
           minLength={8}
           name="dni"
           pattern="[0-9]{8}"
-          placeholder="12345678"
+          placeholder={fieldPlaceholders.dni}
           required
           type="text"
         />
@@ -200,7 +240,7 @@ export function RegistroForm({
 
       <div>
         <label className="dl-label" htmlFor="telefono">
-          Celular
+          {fieldLabels.telefono}
         </label>
         <input
           autoComplete="tel"
@@ -208,7 +248,7 @@ export function RegistroForm({
           id="telefono"
           inputMode="tel"
           name="telefono"
-          placeholder="999 888 777"
+          placeholder={fieldPlaceholders.telefono}
           required
           type="tel"
         />
@@ -216,14 +256,14 @@ export function RegistroForm({
 
       <div>
         <label className="dl-label" htmlFor="email">
-          Correo electrónico
+          {fieldLabels.email}
         </label>
         <input
           autoComplete="email"
           className="dl-input"
           id="email"
           name="email"
-          placeholder="tu@correo.com"
+          placeholder={fieldPlaceholders.email}
           required
           type="email"
         />
@@ -273,9 +313,15 @@ export function RegistroForm({
         }
         type="submit"
       >
-        {submitting ? "Enviando…" : "Confirmar inscripción"}
+        {submitting ? ctaPendingLabel : ctaLabel}
         {!submitting ? <Chevron /> : null}
       </button>
+
+      {footerNote ? (
+        <p className="text-center text-xs leading-relaxed text-muted">
+          {footerNote}
+        </p>
+      ) : null}
     </form>
   );
 }

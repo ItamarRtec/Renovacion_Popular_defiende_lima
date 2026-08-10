@@ -1,25 +1,24 @@
 const STEPS = [
   {
     title: "Regístrate",
-    description: "Completa tus datos y confirma tu inscripción.",
+    description: "Tus datos, un minuto, y ya estás dentro.",
   },
   {
     title: "Capacítate",
-    description: "Completa una capacitación breve y aprueba el cuestionario.",
+    description: "3 videitos cortos desde el celu y listo.",
   },
   {
-    title: "Recibe tu asignación",
-    description: "Te indicaremos tu local, mesa y coordinador.",
+    title: "Recibe tu mesa",
+    description: "Te asignamos tu local — o el más cerca de casa.",
   },
   {
     title: "Defiende tu mesa",
-    description:
-      "Acompaña la jornada electoral y reporta la información requerida.",
+    description: "Un solo día: cuidas el voto y mandas el acta.",
   },
   {
-    title: "Recibe tu remuneración",
+    title: "Cobra por Yape o Plin",
     description:
-      "Una vez validada tu participación, podrás recibir tu compensación.",
+      "Validamos tu participación y cobras. Compensación garantizada.",
   },
 ] as const;
 
@@ -40,8 +39,7 @@ export function ComoFunciona() {
             ¿Cómo funciona?
           </h2>
           <p className="mx-auto mt-4 dl-lede">
-            Cinco pasos para sumarte a Renovación Popular y cuidar cada voto en
-            Lima.
+            Cinco pasos. Sin vueltas. Te capacitas, cuidas tu mesa y cobras.
           </p>
         </div>
 

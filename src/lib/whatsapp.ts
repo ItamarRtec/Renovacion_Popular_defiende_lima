@@ -19,13 +19,25 @@ export function mensajePersoneroWhatsApp(opts: {
   nombres: string;
   apellidos: string;
   dni: string;
+  numero_mesa?: string | null;
+  centro_votacion?: string | null;
+  distrito?: string | null;
 }) {
   const nombre = `${opts.nombres} ${opts.apellidos}`.trim();
-  return [
+  const lines = [
     `Hola Rafael, soy ${nombre} (DNI ${opts.dni}).`,
     "Me registré como personero de Renovación Popular.",
-    "Quiero mi asignación de mesa y el video de capacitación.",
-  ].join(" ");
+  ];
+  if (opts.numero_mesa) {
+    lines.push(`Según ONPE, mi mesa es ${opts.numero_mesa}.`);
+  }
+  if (opts.centro_votacion) {
+    lines.push(`Centro: ${opts.centro_votacion}.`);
+  } else if (opts.distrito) {
+    lines.push(`Distrito: ${opts.distrito}.`);
+  }
+  lines.push("Quiero confirmar mi asignación y el video de capacitación.");
+  return lines.join(" ");
 }
 
 export const REGISTRO_EXITO_STORAGE_KEY = "rp_registro_exito";
@@ -35,4 +47,7 @@ export type RegistroExitoDraft = {
   apellidos: string;
   dni: string;
   telefono: string;
+  numero_mesa?: string | null;
+  centro_votacion?: string | null;
+  distrito?: string | null;
 };

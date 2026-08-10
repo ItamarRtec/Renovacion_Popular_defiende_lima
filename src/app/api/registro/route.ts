@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { consultarMesaPorDni } from "@/lib/onpe-consulta";
 import { clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
 import type { RegistroOrigen } from "@/lib/supabase/database.types";
+
+export const maxDuration = 60;
 
 type RequestBody = {
   nombres?: string;
@@ -15,15 +18,18 @@ type RequestBody = {
   turnstileToken?: string;
 };
 
-const ORIGENES: readonly RegistroOrigen[] = ["defiende_lima", "renovacion_popular"];
+const ORIGENES: readonly RegistroOrigen[] = [
+  "defiende_lima",
+  "renovacion_popular",
+];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const clean = (v: unknown) => String(v ?? "").trim();
 
 /**
- * Alta de inscripción (server-side). Verifica CAPTCHA, valida, aplica
- * rate-limit e inserta con service role. Responde SIEMPRE genérico ante
- * duplicado (no revela quién ya está inscrito → sin oráculo de afiliación).
+ * Alta de inscripción (server-side).
+ * Tras validar, consulta el robot ONPE con el DNI para rellenar mesa/ubigeo
+ * (si ONPE_CONSULTA_URL está configurada). Soft-fail si el robot no responde.
  */
 export async function POST(request: Request) {
   let body: RequestBody;
@@ -35,15 +41,16 @@ export async function POST(request: Request) {
 
   const ip = clientIp(request);
 
-  // 1) CAPTCHA (si está configurado; si no, se omite en dev).
   if (!(await verifyTurnstile(body.turnstileToken, ip))) {
     return NextResponse.json(
-      { error: "Verificación anti-robot fallida. Recarga e inténtalo de nuevo." },
+      {
+        error:
+          "Verificación anti-robot fallida. Recarga e inténtalo de nuevo.",
+      },
       { status: 403 },
     );
   }
 
-  // 2) Validación (autoritativa en el servidor).
   const nombres = clean(body.nombres);
   const apellidos = clean(body.apellidos);
   const dni = clean(body.dni);
@@ -71,12 +78,14 @@ export async function POST(request: Request) {
   const admin = createSupabaseAdminClient();
   if (!admin) {
     return NextResponse.json(
-      { error: "El registro no está configurado. Falta SUPABASE_SERVICE_ROLE_KEY." },
+      {
+        error:
+          "El registro no está configurado. Falta SUPABASE_SERVICE_ROLE_KEY.",
+      },
       { status: 503 },
     );
   }
 
-  // 3) Anti-abuso por IP (Turnstile es el control primario).
   const { data: permitido } = await admin.rpc("rate_limit_hit", {
     p_clave: `reg:${ip}`,
     p_max: 60,
@@ -90,8 +99,9 @@ export async function POST(request: Request) {
     );
   }
 
-  // 4) Insertar solo columnas seguras (nunca plataforma_rol/estado/user_id/…).
-  // Ubicación / afiliación / experiencia se recogen después (capacitación).
+  // Consulta ONPE (robot). Si falla o no está configurado, seguimos con nulls.
+  const mesa = await consultarMesaPorDni(dni);
+
   const { error: insertError } = await admin.from("registros").insert({
     rol: "personero",
     nombres,
@@ -99,18 +109,17 @@ export async function POST(request: Request) {
     dni,
     telefono,
     email,
-    region: null,
-    provincia: null,
-    distrito: null,
+    region: mesa?.region ?? null,
+    provincia: mesa?.provincia ?? null,
+    distrito: mesa?.distrito ?? null,
     afiliado_rp: null,
     experiencia_personero: false,
-    centro_votacion: null,
-    numero_mesa: null,
+    centro_votacion: mesa?.centro_votacion ?? null,
+    numero_mesa: mesa?.numero_mesa ?? null,
     origen,
   });
 
   if (insertError) {
-    // Duplicado (DNI o email): respuesta GENÉRICA, sin revelar afiliación.
     if (insertError.code === "23505") {
       return NextResponse.json({ ok: true });
     }
@@ -121,5 +130,16 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    mesa: mesa
+      ? {
+          numero_mesa: mesa.numero_mesa,
+          centro_votacion: mesa.centro_votacion,
+          region: mesa.region,
+          provincia: mesa.provincia,
+          distrito: mesa.distrito,
+        }
+      : null,
+  });
 }

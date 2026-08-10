@@ -60,7 +60,7 @@ export function Hero({ brand }: HeroProps) {
           style={{ animationDelay: "200ms" }}
         >
           <Link className="dl-btn dl-btn-primary" href={brand.registerHref}>
-            Unirme ahora <Chevron />
+            {isRp ? "Quiero ser personero" : "Unirme ahora"} <Chevron />
           </Link>
           <Link className="dl-btn dl-btn-secondary" href={brand.howHref}>
             Cómo funciona

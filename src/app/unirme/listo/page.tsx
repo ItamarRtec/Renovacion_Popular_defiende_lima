@@ -7,9 +7,9 @@ import { BRANDS } from "@/lib/brands";
 const brand = BRANDS.renovacion_popular;
 
 export const metadata: Metadata = {
-  title: "Felicitaciones — Personero Renovación Popular",
+  title: "Eso es todo, amigos — Personero Renovación Popular",
   description:
-    "Felicitaciones por registrarte como personero de Renovación Popular. Escribe por WhatsApp para tu mesa y capacitación.",
+    "Ya estás inscrito como personero de Renovación Popular. Escribe por WhatsApp para tu mesa y capacitación.",
 };
 
 export default function RegistroListoPage() {

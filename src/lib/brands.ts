@@ -34,8 +34,8 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
     heroTitle: "Renovación Popular",
     heroHighlight: "Lima.",
     heroLede:
-      "La red de personeros, miembros de mesa y ciudadanos de Renovación Popular para contar cada voto con transparencia.",
-    announce: "Elecciones municipales · personeros RP",
+      "Rafael te necesita en tu mesa. Un día, te capacitas al toque y cobras por Yape o Plin. Cada voto cuenta.",
+    announce: "Elecciones · sé personero",
     themeClass: "theme-rp",
   },
   /** Registro interno / legado (no es el hero público). */
