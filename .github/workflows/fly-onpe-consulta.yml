@@ -1,0 +1,33 @@
+# Deploy del robot ONPE (Chromium + Express) a Fly.io.
+# Secrets en GitHub: FLY_API_TOKEN (fly tokens create deploy -a onpe-consulta)
+# Secrets en Fly: CONSULTA_TOKEN (mismo valor que ONPE_CONSULTA_TOKEN en Vercel)
+
+name: Deploy ONPE consulta
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/onpe-consulta/**"
+      - ".github/workflows/fly-onpe-consulta.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: fly-onpe-consulta
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/onpe-consulta
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

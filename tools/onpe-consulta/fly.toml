@@ -1,0 +1,35 @@
+# Configuración de deploy para Fly.io (tools/onpe-consulta).
+# El nombre `app` lo define `fly launch` (o lo editas aquí antes de `fly deploy`).
+# Región `scl` (Santiago) es la más cercana a Perú disponible en Fly.
+
+app = "onpe-consulta"
+primary_region = "scl"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  # Mantener siempre encendido: el cold start de Chromium (~10s) penaliza
+  # el registro ciudadano. El costo es bajo (instancia chica, baja carga).
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "30s"
+    method = "get"
+    path = "/health"
+
+# Chromium necesita RAM. shared-cpu-1x por defecto trae 256MB; subimos a 1GB.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = 1024
