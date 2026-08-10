@@ -11,6 +11,8 @@ export type RegistroEstado =
 
 export type RegistroOrigen = "defiende_lima" | "renovacion_popular";
 
+export type RolMesa = "titular" | "suplente";
+
 export type ActaOrigen = "web" | "whatsapp";
 
 export type RegistroInsert = {
@@ -29,6 +31,7 @@ export type RegistroInsert = {
   experiencia_personero?: boolean;
   origen?: RegistroOrigen;
   estado?: RegistroEstado;
+  rol_mesa?: RolMesa;
   user_id?: string | null;
   plataforma_rol?: PlataformaRol;
   coordinador_id?: string | null;
@@ -38,6 +41,7 @@ export type RegistroRow = RegistroInsert & {
   id: string;
   origen: RegistroOrigen;
   estado: RegistroEstado;
+  rol_mesa: RolMesa;
   user_id: string | null;
   plataforma_rol: PlataformaRol;
   coordinador_id: string | null;
@@ -215,6 +219,7 @@ export type Database = {
       registro_estado: RegistroEstado;
       registro_origen: RegistroOrigen;
       plataforma_rol: PlataformaRol;
+      rol_mesa: RolMesa;
     };
     CompositeTypes: Record<string, never>;
   };

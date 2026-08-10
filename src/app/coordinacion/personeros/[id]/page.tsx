@@ -70,7 +70,8 @@ export default async function CoordinacionPersoneroDetailPage({
           {personero.nombres} {personero.apellidos}
         </h1>
         <p className="mt-3 text-sm text-muted">
-          DNI {personero.dni} · Mesa {personero.numero_mesa ?? "—"} ·{" "}
+          DNI {personero.dni} · Mesa {personero.numero_mesa ?? "—"}
+          {personero.rol_mesa === "suplente" ? " (suplente)" : ""} ·{" "}
           {personero.distrito && personero.provincia
             ? `${personero.distrito}, ${personero.provincia}`
             : "Sin ubicación"}

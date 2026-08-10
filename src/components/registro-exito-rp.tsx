@@ -42,7 +42,8 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
     return buildWhatsAppUrl(phone, text);
   }, [draft, phone]);
 
-  const tieneMesa = Boolean(draft?.numero_mesa);
+  const esSuplente = draft?.rol_mesa === "suplente";
+  const tieneMesaTitular = Boolean(draft?.numero_mesa) && !esSuplente;
 
   return (
     <div className="mx-auto max-w-md text-center">
@@ -69,17 +70,7 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
         {draft ? (
           <>
             Gracias, <strong>{draft.nombres}</strong>. Ya eres personero de{" "}
-            <strong>Renovación Popular</strong>
-            {draft.dni ? (
-              <>
-                {" "}
-                · DNI{" "}
-                <strong className="font-[family-name:var(--font-data)]">
-                  {draft.dni}
-                </strong>
-              </>
-            ) : null}
-            .
+            <strong>Renovación Popular</strong>.
           </>
         ) : (
           <>
@@ -88,28 +79,87 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
         )}
       </p>
 
-      {tieneMesa ? (
+      {esSuplente ? (
+        <div className="rp-mesa-card mx-auto mt-6">
+          <div className="rp-mesa-card__head">
+            <p className="dl-kicker">Lista de suplentes</p>
+          </div>
+          <div className="px-5 pb-5 pt-1 text-left">
+            <p className="text-sm leading-relaxed text-muted">
+              Su mesa ONPE ya tiene personero titular. Quedó en la{" "}
+              <strong className="text-white">lista de suplentes</strong>. Lo
+              contactaremos con una nueva mesa en el{" "}
+              <strong className="text-white">mismo centro de votación</strong>{" "}
+              donde usted vota.
+            </p>
+          </div>
+          <dl className="rp-mesa-card__rows">
+            {draft?.numero_mesa ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">Mesa ONPE</dt>
+                <dd className="rp-mesa-card__value rp-mesa-card__value--data">
+                  {draft.numero_mesa}
+                </dd>
+              </div>
+            ) : null}
+            {draft?.distrito ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">Distrito</dt>
+                <dd className="rp-mesa-card__value">
+                  {draft.distrito}
+                  {!draft.distrito.includes("Lima") ? ", Lima" : ""}
+                </dd>
+              </div>
+            ) : null}
+            {draft?.centro_votacion ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">Local</dt>
+                <dd className="rp-mesa-card__value">{draft.centro_votacion}</dd>
+              </div>
+            ) : null}
+            {draft?.dni ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">DNI</dt>
+                <dd className="rp-mesa-card__value rp-mesa-card__value--data">
+                  {draft.dni}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+        </div>
+      ) : tieneMesaTitular ? (
         <div className="rp-mesa-card mx-auto mt-6">
           <div className="rp-mesa-card__head">
             <p className="dl-kicker">Su mesa</p>
           </div>
-          <div className="rp-mesa-card__body">
-            <p className="text-sm text-muted">Usted es personero de la mesa</p>
+          <div className="rp-mesa-card__mesa">
             <p className="rp-mesa-card__number">{draft!.numero_mesa}</p>
-            {(draft?.distrito || draft?.centro_votacion) && (
-              <div className="rp-mesa-card__meta space-y-1">
-                {draft?.distrito ? (
-                  <p className="text-sm font-medium text-white">
-                    {draft.distrito}
-                    {!draft.distrito.includes("Lima") ? ", Lima" : ""}
-                  </p>
-                ) : null}
-                {draft?.centro_votacion ? (
-                  <p className="text-sm text-muted">{draft.centro_votacion}</p>
-                ) : null}
-              </div>
-            )}
           </div>
+          <dl className="rp-mesa-card__rows">
+            {draft?.distrito ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">Distrito</dt>
+                <dd className="rp-mesa-card__value">
+                  {draft.distrito}
+                  {!draft.distrito.includes("Lima") ? ", Lima" : ""}
+                </dd>
+              </div>
+            ) : null}
+            {draft?.centro_votacion ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">Local</dt>
+                <dd className="rp-mesa-card__value">{draft.centro_votacion}</dd>
+              </div>
+            ) : null}
+            {draft?.dni ? (
+              <div className="rp-mesa-card__row">
+                <dt className="rp-mesa-card__label">DNI</dt>
+                <dd className="rp-mesa-card__value rp-mesa-card__value--data">
+                  {draft.dni}
+                </dd>
+              </div>
+            ) : null}
+          </dl>
         </div>
       ) : (
         <div className="dl-panel mx-auto mt-6 px-5 py-5 text-left">

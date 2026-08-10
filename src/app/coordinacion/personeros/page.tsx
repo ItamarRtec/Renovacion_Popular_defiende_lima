@@ -89,6 +89,11 @@ export default async function CoordinacionPersonerosPage() {
                   <td className="px-4 py-3 tabular-nums text-muted">{p.dni}</td>
                   <td className="px-4 py-3 text-muted">
                     {p.numero_mesa ?? "—"}
+                    {p.rol_mesa === "suplente" ? (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-[#1077A1]">
+                        suplente
+                      </span>
+                    ) : null}
                   </td>
                   <td className="px-4 py-3 tabular-nums">
                     {vistosByRegistro.get(p.id) ?? 0}/{totalVideos}

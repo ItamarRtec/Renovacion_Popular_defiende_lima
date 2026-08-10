@@ -37,6 +37,8 @@ type MesaResult = {
   distrito?: string | null;
 };
 
+type RolMesaResult = "titular" | "suplente";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function readTrimmed(form: FormData, key: string) {
@@ -90,6 +92,8 @@ export function RegistroForm({
   const [submitted, setSubmitted] = useState(false);
   const [submittedMesa, setSubmittedMesa] = useState<MesaResult | null>(null);
   const [submittedDni, setSubmittedDni] = useState<string | null>(null);
+  const [submittedRolMesa, setSubmittedRolMesa] =
+    useState<RolMesaResult | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,6 +161,7 @@ export function RegistroForm({
         ok?: boolean;
         error?: string;
         mesa?: MesaResult | null;
+        rol_mesa?: RolMesaResult;
       };
 
       if (!response.ok || !payload.ok) {
@@ -176,6 +181,7 @@ export function RegistroForm({
           numero_mesa: payload.mesa?.numero_mesa ?? null,
           centro_votacion: payload.mesa?.centro_votacion ?? null,
           distrito: payload.mesa?.distrito ?? null,
+          rol_mesa: payload.rol_mesa ?? "titular",
         };
         try {
           sessionStorage.setItem(
@@ -191,6 +197,7 @@ export function RegistroForm({
 
       setSubmittedDni(dni);
       setSubmittedMesa(payload.mesa ?? null);
+      setSubmittedRolMesa(payload.rol_mesa ?? "titular");
       setSubmitted(true);
     } catch (err) {
       console.error(err);
@@ -203,11 +210,22 @@ export function RegistroForm({
 
   if (submitted) {
     const mesa = submittedMesa?.numero_mesa?.trim();
+    const esSuplente = submittedRolMesa === "suplente";
     return (
       <div className="dl-panel mx-auto max-w-md px-6 py-10 text-center">
         <p className="dl-kicker">Inscripción recibida</p>
         <h2 className="dl-title mt-3 text-2xl">Gracias por unirte</h2>
-        {mesa ? (
+        {esSuplente ? (
+          <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
+            Su mesa ya tiene personero titular. Quedó en la{" "}
+            <strong>lista de suplentes</strong>. Lo contactaremos con una nueva
+            mesa en el mismo centro de votación
+            {submittedMesa?.centro_votacion
+              ? ` (${submittedMesa.centro_votacion})`
+              : ""}
+            .
+          </p>
+        ) : mesa ? (
           <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
             Usted es personero de la mesa{" "}
             <strong className="font-[family-name:var(--font-data)] text-[#1077A1]">

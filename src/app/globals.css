@@ -615,40 +615,71 @@
 .theme-rp .rp-mesa-card {
   overflow: hidden;
   border-radius: var(--radius-lg);
-  border: 1px solid rgb(16 119 161 / 0.22);
-  background: linear-gradient(
-    180deg,
-    rgb(16 119 161 / 0.08) 0%,
-    #ffffff 42%
-  );
-  box-shadow: 0 14px 36px rgb(16 119 161 / 0.1);
+  border: 1px solid rgb(16 119 161 / 0.18);
+  background: #ffffff;
   text-align: left;
 }
 
 .theme-rp .rp-mesa-card__head {
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid rgb(16 119 161 / 0.12);
-  background: rgb(16 119 161 / 0.05);
+  padding: 0.85rem 1.25rem 0.35rem;
 }
 
-.theme-rp .rp-mesa-card__body {
-  padding: 1.25rem;
+.theme-rp .rp-mesa-card__mesa {
+  padding: 0.15rem 1.25rem 1.15rem;
+  text-align: center;
+  border-bottom: 1px solid rgb(16 119 161 / 0.12);
 }
 
 .theme-rp .rp-mesa-card__number {
-  margin-top: 0.25rem;
+  margin: 0;
   font-family: var(--font-data), ui-monospace, monospace;
-  font-size: clamp(2.75rem, 8vw, 3.5rem);
+  font-size: clamp(2.5rem, 7vw, 3.25rem);
   font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.04em;
   color: var(--rp-celeste);
 }
 
-.theme-rp .rp-mesa-card__meta {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgb(16 119 161 / 0.12);
+.theme-rp .rp-mesa-card__rows {
+  margin: 0;
+  padding: 0.35rem 0;
+}
+
+.theme-rp .rp-mesa-card__row {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+  padding: 0.7rem 1.25rem;
+  border-top: 1px solid rgb(16 119 161 / 0.08);
+}
+
+.theme-rp .rp-mesa-card__row:first-child {
+  border-top: none;
+}
+
+.theme-rp .rp-mesa-card__label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.theme-rp .rp-mesa-card__value {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #0b2a36;
+  word-break: break-word;
+}
+
+.theme-rp .rp-mesa-card__value--data {
+  font-family: var(--font-data), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .theme-rp .rp-porki-bubble {

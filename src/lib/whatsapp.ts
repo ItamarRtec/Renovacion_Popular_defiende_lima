@@ -22,19 +22,31 @@ export function mensajePersoneroWhatsApp(opts: {
   numero_mesa?: string | null;
   centro_votacion?: string | null;
   distrito?: string | null;
+  rol_mesa?: "titular" | "suplente" | null;
 }) {
   const nombre = `${opts.nombres} ${opts.apellidos}`.trim();
   const lines = [
     `Hola Rafael, soy ${nombre} (DNI ${opts.dni}).`,
     "Me registré como personero de Renovación Popular.",
   ];
-  if (opts.numero_mesa) {
+  if (opts.rol_mesa === "suplente") {
+    lines.push(
+      "Quedé en lista de suplentes porque mi mesa ONPE ya tenía personero.",
+    );
+    if (opts.centro_votacion) {
+      lines.push(
+        `Quiero una mesa en el mismo centro (${opts.centro_votacion}).`,
+      );
+    } else {
+      lines.push("Quiero una mesa en el mismo centro de votación.");
+    }
+  } else if (opts.numero_mesa) {
     lines.push(`Según ONPE, mi mesa es ${opts.numero_mesa}.`);
-  }
-  if (opts.centro_votacion) {
-    lines.push(`Centro: ${opts.centro_votacion}.`);
-  } else if (opts.distrito) {
-    lines.push(`Distrito: ${opts.distrito}.`);
+    if (opts.centro_votacion) {
+      lines.push(`Centro: ${opts.centro_votacion}.`);
+    } else if (opts.distrito) {
+      lines.push(`Distrito: ${opts.distrito}.`);
+    }
   }
   lines.push("Quiero confirmar mi asignación y el video de capacitación.");
   return lines.join(" ");
@@ -50,4 +62,5 @@ export type RegistroExitoDraft = {
   numero_mesa?: string | null;
   centro_votacion?: string | null;
   distrito?: string | null;
+  rol_mesa?: "titular" | "suplente" | null;
 };

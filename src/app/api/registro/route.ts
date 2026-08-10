@@ -3,7 +3,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { consultarMesaPorDni } from "@/lib/onpe-consulta";
 import { clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
-import type { RegistroOrigen } from "@/lib/supabase/database.types";
+import type {
+  RegistroOrigen,
+  RolMesa,
+} from "@/lib/supabase/database.types";
 
 export const maxDuration = 60;
 
@@ -30,6 +33,7 @@ const clean = (v: unknown) => String(v ?? "").trim();
  * Alta de inscripción (server-side).
  * Tras validar, consulta el robot ONPE con el DNI para rellenar mesa/ubigeo
  * (si ONPE_CONSULTA_URL está configurada). Soft-fail si el robot no responde.
+ * Si la mesa ONPE ya tiene un titular del mismo origen, el alta queda como suplente.
  */
 export async function POST(request: Request) {
   let body: RequestBody;
@@ -122,23 +126,51 @@ export async function POST(request: Request) {
 
   // Consulta ONPE (robot). Si falla o no está configurado, seguimos con nulls.
   const mesa = await consultarMesaPorDni(dni);
+  const numeroMesa = mesa?.numero_mesa?.trim() || null;
 
-  const { error: insertError } = await admin.from("registros").insert({
-    rol: "personero",
-    nombres,
-    apellidos,
-    dni,
-    telefono,
-    email,
-    region: mesa?.region ?? null,
-    provincia: mesa?.provincia ?? null,
-    distrito: mesa?.distrito ?? null,
-    afiliado_rp: null,
-    experiencia_personero: false,
-    centro_votacion: mesa?.centro_votacion ?? null,
-    numero_mesa: mesa?.numero_mesa ?? null,
-    origen,
-  });
+  let rolMesa: RolMesa = "titular";
+  if (numeroMesa) {
+    const { data: mesaOcupada, error: mesaLookupError } = await admin
+      .from("registros")
+      .select("id")
+      .eq("origen", origen)
+      .eq("numero_mesa", numeroMesa)
+      .eq("rol_mesa", "titular")
+      .limit(1)
+      .maybeSingle();
+
+    if (mesaLookupError) {
+      console.error(mesaLookupError);
+      return NextResponse.json(
+        { error: "No pudimos validar su mesa. Intenta de nuevo." },
+        { status: 500 },
+      );
+    }
+
+    if (mesaOcupada) rolMesa = "suplente";
+  }
+
+  const { data: inserted, error: insertError } = await admin
+    .from("registros")
+    .insert({
+      rol: "personero",
+      nombres,
+      apellidos,
+      dni,
+      telefono,
+      email,
+      region: mesa?.region ?? null,
+      provincia: mesa?.provincia ?? null,
+      distrito: mesa?.distrito ?? null,
+      afiliado_rp: null,
+      experiencia_personero: false,
+      centro_votacion: mesa?.centro_votacion ?? null,
+      numero_mesa: numeroMesa,
+      rol_mesa: rolMesa,
+      origen,
+    })
+    .select("id")
+    .single();
 
   if (insertError) {
     if (insertError.code === "23505") {
@@ -173,8 +205,34 @@ export async function POST(request: Request) {
     );
   }
 
+  // Carrera: si dos titulares entraron a la vez, el más antiguo se queda;
+  // demotamos solo la fila recién creada.
+  if (rolMesa === "titular" && numeroMesa && inserted?.id) {
+    const { data: titulares } = await admin
+      .from("registros")
+      .select("id")
+      .eq("origen", origen)
+      .eq("numero_mesa", numeroMesa)
+      .eq("rol_mesa", "titular")
+      .order("created_at", { ascending: true });
+
+    const primero = titulares?.[0]?.id;
+    if (primero && primero !== inserted.id) {
+      const { error: demoteError } = await admin
+        .from("registros")
+        .update({ rol_mesa: "suplente" })
+        .eq("id", inserted.id);
+      if (demoteError) {
+        console.error(demoteError);
+      } else {
+        rolMesa = "suplente";
+      }
+    }
+  }
+
   return NextResponse.json({
     ok: true,
+    rol_mesa: rolMesa,
     mesa: mesa
       ? {
           numero_mesa: mesa.numero_mesa,
