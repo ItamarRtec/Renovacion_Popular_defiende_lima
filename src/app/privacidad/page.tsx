@@ -7,9 +7,8 @@ export const metadata: Metadata = {
     "Tratamiento de datos personales de la iniciativa, conforme a la Ley 29733.",
 };
 
-// NOTA: BORRADOR. Completa los campos marcados con [COMPLETAR] con la
-// información legal real (responsable del banco de datos, RUC/domicilio,
-// plazo de conservación y canal para ejercer derechos) antes de publicar.
+// NOTA: BORRADOR. Completa los campos marcados con [COMPLETAR] (plazo de
+// conservación, encargados adicionales) antes de publicar.
 export default function PrivacidadPage() {
   return (
     <>
@@ -30,10 +29,25 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-lg font-medium">1. Responsable</h2>
               <p className="mt-2 text-muted">
-                Responsable del banco de datos: <strong>[COMPLETAR: nombre /
-                organización]</strong>, RUC <strong>[COMPLETAR]</strong>, con
-                domicilio en <strong>[COMPLETAR]</strong>. Contacto:{" "}
-                <strong>[COMPLETAR: correo/teléfono]</strong>.
+                Responsable del banco de datos:{" "}
+                <strong>Partido Político Renovación Popular</strong>, con
+                domicilio en{" "}
+                <strong>Calle Costa Rica Nº157, Jesús María, Lima</strong>.
+                Contacto:{" "}
+                <a
+                  className="underline underline-offset-2"
+                  href="mailto:renovacionpopularperu@gmail.com"
+                >
+                  renovacionpopularperu@gmail.com
+                </a>{" "}
+                / WhatsApp{" "}
+                <a
+                  className="underline underline-offset-2"
+                  href="https://wa.me/51928037519"
+                >
+                  928 037 519
+                </a>
+                .
               </p>
             </section>
 
@@ -71,15 +85,14 @@ export default function PrivacidadPage() {
               <p className="mt-2 text-muted">
                 Tus datos se almacenan en Supabase (infraestructura del banco de
                 datos) y se comparten únicamente con el equipo coordinador de la
-                iniciativa. <strong>[COMPLETAR: flujos internacionales u otros
-                encargados, si aplica]</strong>.
+                iniciativa.
               </p>
             </section>
 
             <section>
               <h2 className="text-lg font-medium">6. Conservación</h2>
               <p className="mt-2 text-muted">
-                Conservamos tus datos por <strong>[COMPLETAR: plazo]</strong> o
+                Conservamos tus datos por <strong>6 meses</strong> o
                 hasta que revoques tu consentimiento, tras lo cual se eliminan o
                 anonimizan.
               </p>
@@ -90,7 +103,13 @@ export default function PrivacidadPage() {
               <p className="mt-2 text-muted">
                 Puedes ejercer tus derechos de acceso, rectificación,
                 cancelación y oposición escribiendo a{" "}
-                <strong>[COMPLETAR: correo/canal]</strong>. También puedes
+                <a
+                  className="underline underline-offset-2"
+                  href="mailto:renovacionpopularperu@gmail.com"
+                >
+                  renovacionpopularperu@gmail.com
+                </a>
+                . También puedes
                 presentar un reclamo ante la Autoridad Nacional de Protección de
                 Datos Personales.
               </p>

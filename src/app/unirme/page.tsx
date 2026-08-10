@@ -91,6 +91,11 @@ export default function UnirmePage() {
               ))}
             </ul>
 
+            <div
+              aria-hidden
+              className="mx-auto mt-10 max-w-md border-t border-border"
+            />
+
             <div className="mt-10">
               <RegistroForm
                 ctaLabel="Quiero ser personero"
