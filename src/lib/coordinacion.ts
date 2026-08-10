@@ -16,6 +16,17 @@ export async function loadTeamPersoneros(
     return data ?? [];
   }
 
+  // Sin territorio asignado aún, solo personeros vinculados a mano.
+  if (!me.provincia || !me.distrito) {
+    const { data: manualOnly } = await supabase
+      .from("registros")
+      .select("*")
+      .eq("coordinador_id", me.id);
+    return (manualOnly ?? []).sort((a, b) =>
+      a.apellidos.localeCompare(b.apellidos, "es"),
+    );
+  }
+
   const [{ data: territorial }, { data: manual }] = await Promise.all([
     supabase
       .from("registros")
