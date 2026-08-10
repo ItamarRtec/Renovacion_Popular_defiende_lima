@@ -86,17 +86,17 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       <div className="mx-auto mb-2 flex flex-col items-center">
         <h1
           className="rp-porki-bubble mb-3"
-          aria-label="Porki dice: Eso es todo amigos."
+          aria-label="Rafael dice: Eso es todo amigos."
         >
           Eso es todo amigos.
         </h1>
-        <div className="h-28 w-28">
+        <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-[#1077A1]/30 shadow-[0_10px_28px_rgb(16_119_161_/_0.2)]">
           <Image
-            src="/brands/renovacion-popular/porki.png"
-            alt="Porki"
+            src="/brands/renovacion-popular/rafael-face.png"
+            alt="Rafael López Aliaga"
             width={224}
             height={224}
-            className="h-full w-full object-contain"
+            className="h-full w-full object-cover object-[50%_42%]"
             priority
           />
         </div>
@@ -207,8 +207,7 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       )}
 
       <p className="mx-auto mt-6 text-sm leading-relaxed text-muted">
-        Mientras tanto, espere a que <strong>Rafael López Aliaga</strong> se
-        comunique con usted.
+        Pronto nos contactaremos contigo.
       </p>
 
       <div className="mt-10 flex flex-col items-stretch gap-3">

@@ -14,8 +14,7 @@ const PITCH = [
 
 export const metadata: Metadata = {
   title: "Sé personero — Renovación Popular",
-  description:
-    "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
+  description: "Si eres de Lima necesito tu apoyo. Te necesito en tu mesa.",
 };
 
 export default function UnirmePage() {
@@ -65,13 +64,11 @@ export default function UnirmePage() {
               </div>
               <p className="dl-kicker">Elecciones · tu mesa cuenta</p>
               <h1 className="dl-title mt-3 text-[clamp(2.25rem,6vw,3rem)]">
-                Sé personero.{" "}
-                <span className="dl-accent-underline">Ya.</span>
+                Sé personero.
               </h1>
               <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
-                Si eres de Lima, Rafael te necesita en{" "}
-                <strong className="font-semibold text-[#0b2a36]">tu mesa</strong>
-                . Un día y cobras por Yape o Plin.
+                Si eres de Lima necesito tu apoyo. Te necesito en{" "}
+                <span className="dl-accent-underline">tu mesa</span>.
               </p>
             </div>
 

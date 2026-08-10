@@ -249,8 +249,7 @@ export function RegistroForm({
           </p>
         )}
         <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-          Mientras tanto, espere a que <strong>Rafael López Aliaga</strong> se
-          comunique con usted.
+          Pronto nos contactaremos contigo.
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <Link className="dl-btn dl-btn-primary" href={homeHref}>

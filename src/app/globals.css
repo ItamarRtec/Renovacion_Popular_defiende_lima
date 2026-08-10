@@ -547,7 +547,9 @@
 
 .theme-rp .dl-accent-underline {
   background-image: none;
-  background-color: var(--rp-celeste);
+  background-color: transparent;
+  border-bottom: 0.12em solid var(--rp-celeste);
+  padding-bottom: 0.04em;
 }
 
 .theme-rp .dl-kicker {

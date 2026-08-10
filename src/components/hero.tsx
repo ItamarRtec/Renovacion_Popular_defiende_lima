@@ -49,15 +49,15 @@ export function Hero({ brand }: HeroProps) {
             className="dl-animate-rise mt-3 max-w-[16ch] text-[clamp(2.75rem,8vw,4.25rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-balance text-[#0b2a36]"
             style={{ animationDelay: "110ms" }}
           >
-            Sé personero.{" "}
-            <span className="dl-accent-underline">{brand.heroHighlight}</span>
+            Sé personero.
           </h1>
 
           <p
             className="dl-animate-rise mt-6 max-w-lg text-[17px] font-normal leading-[1.5] tracking-[-0.022em] text-muted sm:text-[19px]"
             style={{ animationDelay: "150ms" }}
           >
-            {brand.heroLede}
+            Si eres de Lima necesito tu apoyo. Te necesito en{" "}
+            <span className="dl-accent-underline">tu mesa</span>.
           </p>
 
           <div

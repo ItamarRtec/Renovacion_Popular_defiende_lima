@@ -9,8 +9,7 @@ const mono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Sé personero — Renovación Popular",
-  description:
-    "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
+  description: "Si eres de Lima necesito tu apoyo. Te necesito en tu mesa.",
   icons: {
     icon: [
       {
