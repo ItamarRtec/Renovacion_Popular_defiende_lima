@@ -29,11 +29,30 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const clean = (v: unknown) => String(v ?? "").trim();
 
+/** Normaliza mesa ONPE (espacios / ceros a la izquierda) para comparar. */
+function normalizeNumeroMesa(raw: string | null | undefined): string | null {
+  const t = String(raw ?? "").trim();
+  if (!t) return null;
+  if (/^\d+$/.test(t)) return t.padStart(6, "0");
+  return t;
+}
+
+/** Variantes de mesa para encontrar filas ya guardadas sin pad uniforme. */
+function numeroMesaVariants(numeroMesa: string): string[] {
+  const variants = new Set<string>([numeroMesa]);
+  if (/^\d+$/.test(numeroMesa)) {
+    const stripped = numeroMesa.replace(/^0+/, "") || "0";
+    variants.add(stripped);
+    variants.add(stripped.padStart(6, "0"));
+  }
+  return [...variants];
+}
+
 /**
  * Alta de inscripción (server-side).
  * Tras validar, consulta el robot ONPE con el DNI para rellenar mesa/ubigeo
  * (si ONPE_CONSULTA_URL está configurada). Soft-fail si el robot no responde.
- * Si la mesa ONPE ya tiene un titular del mismo origen, el alta queda como suplente.
+ * Si la mesa ONPE ya tiene un personero del mismo origen, el alta queda como suplente.
  */
 export async function POST(request: Request) {
   let body: RequestBody;
@@ -126,28 +145,30 @@ export async function POST(request: Request) {
 
   // Consulta ONPE (robot). Si falla o no está configurado, seguimos con nulls.
   const mesa = await consultarMesaPorDni(dni);
-  const numeroMesa = mesa?.numero_mesa?.trim() || null;
+  const numeroMesa = normalizeNumeroMesa(mesa?.numero_mesa);
 
   let rolMesa: RolMesa = "titular";
   if (numeroMesa) {
-    const { data: mesaOcupada, error: mesaLookupError } = await admin
+    // Cualquier personero previo con la misma mesa (mismo origen) → suplente.
+    const { data: ocupantes, error: mesaLookupError } = await admin
       .from("registros")
       .select("id")
       .eq("origen", origen)
-      .eq("numero_mesa", numeroMesa)
-      .eq("rol_mesa", "titular")
-      .limit(1)
-      .maybeSingle();
+      .in("numero_mesa", numeroMesaVariants(numeroMesa))
+      .limit(1);
 
     if (mesaLookupError) {
-      console.error(mesaLookupError);
+      console.error("mesa ocupada lookup", mesaLookupError);
       return NextResponse.json(
         { error: "No pudimos validar su mesa. Intenta de nuevo." },
         { status: 500 },
       );
     }
 
-    if (mesaOcupada) rolMesa = "suplente";
+    if (ocupantes && ocupantes.length > 0) {
+      rolMesa = "suplente";
+      console.info("registro suplente", { dni, numeroMesa, origen });
+    }
   }
 
   const { data: inserted, error: insertError } = await admin
@@ -212,7 +233,7 @@ export async function POST(request: Request) {
       .from("registros")
       .select("id")
       .eq("origen", origen)
-      .eq("numero_mesa", numeroMesa)
+      .in("numero_mesa", numeroMesaVariants(numeroMesa))
       .eq("rol_mesa", "titular")
       .order("created_at", { ascending: true });
 
