@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Bot ONPE (Playwright); se lintea con su propio eslint en tools/onpe-consulta.
+    "tools/**",
   ]),
 ]);
 

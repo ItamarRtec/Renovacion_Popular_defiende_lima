@@ -7,8 +7,7 @@ export const metadata: Metadata = {
     "Tratamiento de datos personales de la iniciativa, conforme a la Ley 29733.",
 };
 
-// NOTA: BORRADOR. Completa los campos marcados con [COMPLETAR] (plazo de
-// conservación, encargados adicionales) antes de publicar.
+// Política de privacidad — Ley 29733.
 export default function PrivacidadPage() {
   return (
     <>
@@ -83,9 +82,14 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-lg font-medium">5. Destinatarios y encargados</h2>
               <p className="mt-2 text-muted">
-                Tus datos se almacenan en Supabase (infraestructura del banco de
-                datos) y se comparten únicamente con el equipo coordinador de la
-                iniciativa.
+                Tus datos se almacenan en <strong>Supabase</strong> (infraestructura
+                del banco de datos). El sitio se hospeda en{" "}
+                <strong>Vercel</strong>; la protección anti-bots del acceso usa{" "}
+                <strong>Cloudflare Turnstile</strong>. La consulta de mesa electoral
+                (si está habilitada) se realiza a través de un servicio propio que
+                consulta el padrón de la ONPE con tu DNI. Se comparten únicamente
+                con el equipo coordinador de la iniciativa. No hay otros encargados
+                de tratamiento adicionales.
               </p>
             </section>
 
