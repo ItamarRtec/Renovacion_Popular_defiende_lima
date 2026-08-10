@@ -9,8 +9,8 @@ type Personero = {
   nombres: string;
   apellidos: string;
   dni: string;
-  distrito: string;
-  provincia: string;
+  distrito: string | null;
+  provincia: string | null;
   coordinador_id: string | null;
 };
 
@@ -18,8 +18,8 @@ type Coordinador = {
   id: string;
   nombres: string;
   apellidos: string;
-  distrito: string;
-  provincia: string;
+  distrito: string | null;
+  provincia: string | null;
 };
 
 export function AdminAsignaciones({
@@ -42,7 +42,7 @@ export function AdminAsignaciones({
         p.dni.includes(q) ||
         p.nombres.toLowerCase().includes(q) ||
         p.apellidos.toLowerCase().includes(q) ||
-        p.distrito.toLowerCase().includes(q),
+        (p.distrito?.toLowerCase().includes(q) ?? false),
     );
   }, [filter, personeros]);
 
@@ -106,7 +106,9 @@ export function AdminAsignaciones({
                   <p className="text-xs tabular-nums text-muted">{p.dni}</p>
                 </td>
                 <td className="px-4 py-3 text-muted">
-                  {p.distrito}, {p.provincia}
+                  {p.distrito && p.provincia
+                    ? `${p.distrito}, ${p.provincia}`
+                    : "Sin ubicación"}
                 </td>
                 <td className="px-4 py-3">
                   <select
@@ -118,7 +120,8 @@ export function AdminAsignaciones({
                     <option value="">Solo territorio</option>
                     {coordinadores.map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.apellidos}, {c.nombres} — {c.distrito}
+                        {c.apellidos}, {c.nombres}
+                        {c.distrito ? ` — ${c.distrito}` : ""}
                       </option>
                     ))}
                   </select>

@@ -1,19 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 import { Chevron } from "@/components/icons/chevron";
 import { Turnstile, turnstileConfigured } from "@/components/turnstile";
 import type { RegistroOrigen } from "@/lib/supabase/database.types";
 import {
-  PROVINCIAS_POR_REGION,
-  REGIONES,
-  distritosDe,
-} from "@/lib/ubicacion";
+  REGISTRO_EXITO_STORAGE_KEY,
+  type RegistroExitoDraft,
+} from "@/lib/whatsapp";
 
 type RegistroFormProps = {
   origen?: RegistroOrigen;
   homeHref?: string;
+  /** Si se define, tras un alta OK navega aquí (RP: /unirme/listo). */
+  successHref?: string;
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,15 +27,9 @@ function readTrimmed(form: FormData, key: string) {
 export function RegistroForm({
   origen = "defiende_lima",
   homeHref = "/",
+  successHref,
 }: RegistroFormProps) {
-  const isRp = origen === "renovacion_popular";
-  const [region, setRegion] = useState("");
-  const [provincia, setProvincia] = useState("");
-  const [distrito, setDistrito] = useState("");
-  const [afiliadoRp, setAfiliadoRp] = useState<"si" | "no" | "">("");
-  const [experienciaPersonero, setExperienciaPersonero] = useState<
-    "si" | "no" | ""
-  >("");
+  const router = useRouter();
   const [consentimiento, setConsentimiento] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaNonce, setCaptchaNonce] = useState(0);
@@ -42,15 +38,6 @@ export function RegistroForm({
   const [error, setError] = useState<string | null>(null);
 
   const captchaRequired = turnstileConfigured();
-
-  const provincias = useMemo(
-    () => (region ? (PROVINCIAS_POR_REGION[region] ?? []) : []),
-    [region],
-  );
-  const distritos = useMemo(
-    () => (region && provincia ? distritosDe(region, provincia) : []),
-    [region, provincia],
-  );
 
   function resetCaptcha() {
     setCaptchaToken(null);
@@ -67,22 +54,6 @@ export function RegistroForm({
     const dni = readTrimmed(form, "dni");
     const telefono = readTrimmed(form, "telefono");
     const email = readTrimmed(form, "email").toLowerCase();
-    const centro_votacion = readTrimmed(form, "centro_votacion");
-    const numero_mesa = readTrimmed(form, "numero_mesa");
-
-    const experiencia =
-      experienciaPersonero === "si"
-        ? true
-        : experienciaPersonero === "no"
-          ? false
-          : null;
-    const afiliado = !isRp
-      ? null
-      : afiliadoRp === "si"
-        ? true
-        : afiliadoRp === "no"
-          ? false
-          : null;
 
     // Validación de cliente (el servidor revalida igualmente).
     if (nombres.length < 2) return setError("Ingresa tus nombres.");
@@ -91,13 +62,6 @@ export function RegistroForm({
     if (telefono.replace(/\D/g, "").length < 9)
       return setError("Ingresa un celular válido (9 dígitos).");
     if (!EMAIL_RE.test(email)) return setError("Ingresa un correo válido.");
-    if (!region) return setError("Selecciona tu región.");
-    if (!provincia) return setError("Selecciona tu provincia.");
-    if (!distrito) return setError("Selecciona tu distrito.");
-    if (experiencia === null)
-      return setError("Indica si tienes experiencia previa como personero.");
-    if (isRp && afiliado === null)
-      return setError("Indica si eres afiliado a Renovación Popular.");
     if (!consentimiento)
       return setError("Debes aceptar el tratamiento de tus datos para continuar.");
     if (captchaRequired && !captchaToken)
@@ -114,13 +78,6 @@ export function RegistroForm({
           dni,
           telefono,
           email,
-          region,
-          provincia,
-          distrito,
-          afiliado_rp: afiliado,
-          experiencia_personero: experiencia,
-          centro_votacion,
-          numero_mesa,
           origen,
           consentimiento,
           turnstileToken: captchaToken,
@@ -133,7 +90,28 @@ export function RegistroForm({
 
       if (!response.ok || !payload.ok) {
         resetCaptcha();
-        setError(payload.error ?? "No pudimos guardar tu inscripción. Intenta de nuevo.");
+        setError(
+          payload.error ?? "No pudimos guardar tu inscripción. Intenta de nuevo.",
+        );
+        return;
+      }
+
+      if (successHref) {
+        const draft: RegistroExitoDraft = {
+          nombres,
+          apellidos,
+          dni,
+          telefono,
+        };
+        try {
+          sessionStorage.setItem(
+            REGISTRO_EXITO_STORAGE_KEY,
+            JSON.stringify(draft),
+          );
+        } catch {
+          // private mode / quota — la página listo funciona sin draft
+        }
+        router.push(successHref);
         return;
       }
 
@@ -251,171 +229,6 @@ export function RegistroForm({
         />
       </div>
 
-      <fieldset className="space-y-4 border-t border-border pt-5">
-        <legend className="dl-label mb-1">Ubicación de votación</legend>
-        <p className="text-xs leading-relaxed text-zinc-500">
-          Nota importante: seleccione el distrito donde apoyará como personero.
-        </p>
-
-        <div>
-          <label className="dl-label" htmlFor="region">
-            Región
-          </label>
-          <select
-            className="dl-input"
-            id="region"
-            name="region"
-            required
-            value={region}
-            onChange={(event) => {
-              const next = event.target.value;
-              setRegion(next);
-              setProvincia("");
-              setDistrito("");
-            }}
-          >
-            <option value="">Selecciona región</option>
-            {REGIONES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="dl-label" htmlFor="provincia">
-            Provincia
-          </label>
-          <select
-            className="dl-input"
-            disabled={!region}
-            id="provincia"
-            name="provincia"
-            required
-            value={provincia}
-            onChange={(event) => {
-              setProvincia(event.target.value);
-              setDistrito("");
-            }}
-          >
-            <option value="">Selecciona provincia</option>
-            {provincias.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="dl-label" htmlFor="distrito">
-            Distrito
-          </label>
-          <select
-            className="dl-input"
-            disabled={!provincia}
-            id="distrito"
-            name="distrito"
-            required
-            value={distrito}
-            onChange={(event) => setDistrito(event.target.value)}
-          >
-            <option value="">Selecciona distrito</option>
-            {distritos.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="dl-label" htmlFor="centro_votacion">
-            Centro de votación
-          </label>
-          <input
-            autoComplete="off"
-            className="dl-input"
-            id="centro_votacion"
-            name="centro_votacion"
-            placeholder="Ej. I.E. 1023 San Martín"
-            type="text"
-          />
-        </div>
-
-        <div>
-          <label className="dl-label" htmlFor="numero_mesa">
-            Número de mesa
-          </label>
-          <input
-            autoComplete="off"
-            className="dl-input font-[family-name:var(--font-data)]"
-            id="numero_mesa"
-            inputMode="numeric"
-            name="numero_mesa"
-            placeholder="Ej. 001234"
-            type="text"
-          />
-        </div>
-      </fieldset>
-
-      {isRp ? (
-        <fieldset className="space-y-3">
-          <legend className="dl-label mb-1">
-            ¿Es afiliado a Renovación Popular?
-          </legend>
-          <div className="flex gap-3">
-            {(
-              [
-                ["si", "Sí"],
-                ["no", "No"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                aria-pressed={afiliadoRp === value}
-                className={`dl-btn flex-1 ${
-                  afiliadoRp === value ? "dl-btn-primary" : "dl-btn-secondary"
-                }`}
-                onClick={() => setAfiliadoRp(value)}
-                type="button"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-      ) : null}
-
-      <fieldset className="space-y-3">
-        <legend className="dl-label mb-1">
-          ¿Tiene experiencia previa como personero?
-        </legend>
-        <div className="flex gap-3">
-          {(
-            [
-              ["si", "Sí"],
-              ["no", "No"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              aria-pressed={experienciaPersonero === value}
-              className={`dl-btn flex-1 ${
-                experienciaPersonero === value
-                  ? "dl-btn-primary"
-                  : "dl-btn-secondary"
-              }`}
-              onClick={() => setExperienciaPersonero(value)}
-              type="button"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
-
       <label className="flex items-start gap-3 text-xs leading-relaxed text-zinc-500">
         <input
           checked={consentimiento}
@@ -424,9 +237,8 @@ export function RegistroForm({
           type="checkbox"
         />
         <span>
-          Acepto el tratamiento de mis datos personales (incluida mi afiliación
-          política) para esta iniciativa ciudadana —capacitación, asignación y
-          contacto— conforme a la{" "}
+          Acepto el tratamiento de mis datos personales para esta iniciativa
+          ciudadana —capacitación, asignación y contacto— conforme a la{" "}
           <Link
             className="underline underline-offset-2"
             href="/privacidad"

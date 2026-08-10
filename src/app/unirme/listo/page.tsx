@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { RegistroForm } from "@/components/registro-form";
+import { RegistroExitoRp } from "@/components/registro-exito-rp";
 import { BRANDS } from "@/lib/brands";
 
 const brand = BRANDS.renovacion_popular;
 
 export const metadata: Metadata = {
-  title: "Registro de Personeros de Mesa — Renovación Popular",
+  title: "Felicitaciones — Personero Renovación Popular",
   description:
-    "Regístrate como personero de mesa con Renovación Popular.",
+    "Felicitaciones por registrarte como personero de Renovación Popular. Escribe por WhatsApp para tu mesa y capacitación.",
 };
 
-export default function UnirmePage() {
+export default function RegistroListoPage() {
   return (
     <>
       <style>{`
@@ -38,32 +38,12 @@ export default function UnirmePage() {
                 {brand.name}
               </span>
             </Link>
-            <Link className="dl-nav-link" href={brand.howHref}>
-              Cómo funciona
-            </Link>
           </div>
         </header>
 
         <main className="flex-1">
           <section className="dl-container px-4 pb-20 pt-12 sm:pt-16">
-            <div className="mx-auto max-w-md text-center">
-              <p className="dl-kicker">Paso 1 · Registro</p>
-              <h1 className="dl-title mt-3 text-[clamp(2rem,5vw,2.75rem)]">
-                Registro de Personeros de Mesa
-              </h1>
-              <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
-                Completa tus datos. Luego escribe por WhatsApp para tu mesa y
-                el video de capacitación.
-              </p>
-            </div>
-
-            <div className="mt-10">
-              <RegistroForm
-                homeHref={brand.homeHref}
-                origen={brand.origen}
-                successHref="/unirme/listo"
-              />
-            </div>
+            <RegistroExitoRp homeHref={brand.homeHref} />
           </section>
         </main>
       </div>

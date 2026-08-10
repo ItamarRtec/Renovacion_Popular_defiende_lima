@@ -5,7 +5,6 @@ import type { BrandConfig } from "@/lib/brands";
 
 const NAV_LINKS = [
   { hash: "#como-funciona", label: "Cómo funciona", chevron: true },
-  { hash: "#roles", label: "Roles", chevron: true },
 ] as const;
 
 type SiteHeaderProps = {

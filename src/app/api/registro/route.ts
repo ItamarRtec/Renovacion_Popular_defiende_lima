@@ -10,13 +10,6 @@ type RequestBody = {
   dni?: string;
   telefono?: string;
   email?: string;
-  region?: string;
-  provincia?: string;
-  distrito?: string;
-  afiliado_rp?: boolean | null;
-  experiencia_personero?: boolean;
-  centro_votacion?: string;
-  numero_mesa?: string;
   origen?: string;
   consentimiento?: boolean;
   turnstileToken?: string;
@@ -56,11 +49,6 @@ export async function POST(request: Request) {
   const dni = clean(body.dni);
   const telefono = clean(body.telefono).replace(/\D/g, "");
   const email = clean(body.email).toLowerCase();
-  const region = clean(body.region);
-  const provincia = clean(body.provincia);
-  const distrito = clean(body.distrito);
-  const centro_votacion = clean(body.centro_votacion);
-  const numero_mesa = clean(body.numero_mesa);
   const origen = clean(body.origen) as RegistroOrigen;
 
   const errors: Record<string, string> = {};
@@ -69,14 +57,7 @@ export async function POST(request: Request) {
   if (!/^\d{8}$/.test(dni)) errors.dni = "El DNI debe tener 8 dígitos.";
   if (telefono.length < 9) errors.telefono = "Ingresa un celular válido.";
   if (!EMAIL_RE.test(email)) errors.email = "Ingresa un correo válido.";
-  if (region.length < 2) errors.region = "Selecciona tu región.";
-  if (provincia.length < 2) errors.provincia = "Selecciona tu provincia.";
-  if (distrito.length < 2) errors.distrito = "Selecciona tu distrito.";
-  if (typeof body.experiencia_personero !== "boolean")
-    errors.experiencia_personero = "Indica tu experiencia como personero.";
   if (!ORIGENES.includes(origen)) errors.origen = "Origen inválido.";
-  if (origen === "renovacion_popular" && typeof body.afiliado_rp !== "boolean")
-    errors.afiliado_rp = "Indica si eres afiliado a Renovación Popular.";
   if (body.consentimiento !== true)
     errors.consentimiento = "Debes aceptar el tratamiento de tus datos.";
 
@@ -110,6 +91,7 @@ export async function POST(request: Request) {
   }
 
   // 4) Insertar solo columnas seguras (nunca plataforma_rol/estado/user_id/…).
+  // Ubicación / afiliación / experiencia se recogen después (capacitación).
   const { error: insertError } = await admin.from("registros").insert({
     rol: "personero",
     nombres,
@@ -117,14 +99,13 @@ export async function POST(request: Request) {
     dni,
     telefono,
     email,
-    region,
-    provincia,
-    distrito,
-    afiliado_rp:
-      origen === "renovacion_popular" ? Boolean(body.afiliado_rp) : null,
-    experiencia_personero: Boolean(body.experiencia_personero),
-    centro_votacion: centro_votacion || null,
-    numero_mesa: numero_mesa || null,
+    region: null,
+    provincia: null,
+    distrito: null,
+    afiliado_rp: null,
+    experiencia_personero: false,
+    centro_votacion: null,
+    numero_mesa: null,
     origen,
   });
 

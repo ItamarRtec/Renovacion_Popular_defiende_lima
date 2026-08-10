@@ -30,7 +30,9 @@ export default async function CoordinacionHomePage() {
       <h1 className="dl-title mt-3 text-3xl">
         {plataformaRol === "administrador"
           ? "Vista general"
-          : `${registro.distrito}, ${registro.provincia}`}
+          : registro.distrito && registro.provincia
+            ? `${registro.distrito}, ${registro.provincia}`
+            : "Tu territorio"}
       </h1>
       <p className="mt-3 text-sm text-muted">
         Personeros de tu territorio y asignaciones manuales.

@@ -71,7 +71,9 @@ export default async function CoordinacionPersoneroDetailPage({
         </h1>
         <p className="mt-3 text-sm text-muted">
           DNI {personero.dni} · Mesa {personero.numero_mesa ?? "—"} ·{" "}
-          {personero.distrito}, {personero.provincia}
+          {personero.distrito && personero.provincia
+            ? `${personero.distrito}, ${personero.provincia}`
+            : "Sin ubicación"}
         </p>
         <p className="mt-1 text-sm capitalize text-muted">
           Estado: {personero.estado}

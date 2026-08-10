@@ -22,11 +22,11 @@ export type RegistroInsert = {
   email: string;
   centro_votacion?: string | null;
   numero_mesa?: string | null;
-  region: string;
-  provincia: string;
-  distrito: string;
+  region?: string | null;
+  provincia?: string | null;
+  distrito?: string | null;
   afiliado_rp?: boolean | null;
-  experiencia_personero: boolean;
+  experiencia_personero?: boolean;
   origen?: RegistroOrigen;
   estado?: RegistroEstado;
   user_id?: string | null;
@@ -41,6 +41,10 @@ export type RegistroRow = RegistroInsert & {
   user_id: string | null;
   plataforma_rol: PlataformaRol;
   coordinador_id: string | null;
+  region: string | null;
+  provincia: string | null;
+  distrito: string | null;
+  experiencia_personero: boolean;
   created_at: string;
   updated_at: string;
 };
