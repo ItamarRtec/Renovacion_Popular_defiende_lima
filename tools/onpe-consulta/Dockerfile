@@ -5,8 +5,8 @@
 # https://consultaelectoral.onpe.gob.pe por DNI.
 #
 # Build:  docker build -t onpe-consulta ./tools/onpe-consulta
-# Run:    docker run --rm -p 8787:8787 -e HOST=0.0.0.0 -e CONSULTA_TOKEN=xxx onpe-consulta
-# Fly:    fly deploy (usa fly.toml)
+# Run:    docker run --rm -p 8787:8787 -e HOST=0.0.0.0 -e CONSULTA_TOKEN=xxx -e PROXY_URL=http://user:pass@host:port onpe-consulta
+# Fly:    fly deploy (usa fly.toml). En producción define PROXY_URL (residencial sticky).
 
 FROM node:20-slim
 

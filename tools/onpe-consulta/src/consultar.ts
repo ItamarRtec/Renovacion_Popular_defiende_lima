@@ -223,13 +223,62 @@ function mapearResultado(
 
 type FetchResult = { status: number; text: string; error?: string };
 
+/** Playwright proxy config (Chromium no acepta user:pass inline en la URL). */
+type ProxyConfig = { server: string; username?: string; password?: string };
+
+/**
+ * Parsea PROXY_URL (http://user:pass@host:port o http://host:port).
+ * Vacío / ausente → sin proxy (solo válido en desarrollo local).
+ */
+export function parseProxyUrl(raw: string | undefined): ProxyConfig | null {
+  const value = (raw ?? "").trim();
+  if (!value) return null;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new ConsultaError(
+      "PROXY_URL inválida. Usa http://user:pass@host:port",
+      "DESCONOCIDO",
+    );
+  }
+  if (!url.hostname || !url.port) {
+    throw new ConsultaError(
+      "PROXY_URL debe incluir host y puerto (ej. http://user:pass@host:12321).",
+      "DESCONOCIDO",
+    );
+  }
+  const server = `${url.protocol}//${url.hostname}:${url.port}`;
+  const username = url.username ? decodeURIComponent(url.username) : undefined;
+  const password = url.password ? decodeURIComponent(url.password) : undefined;
+  return {
+    server,
+    ...(username ? { username } : {}),
+    ...(password ? { password } : {}),
+  };
+}
+
+const DNI_INPUT =
+  'input[formcontrolname="numeroDocumento"], input[placeholder="Número de DNI"]';
+const FORM_WAIT_MS = 90_000;
+
+async function pageDiagnostics(page: Page): Promise<string> {
+  const title = await page.title().catch(() => "");
+  const href = page.url();
+  return `title=${JSON.stringify(title)} url=${JSON.stringify(href)}`;
+}
+
 export class OnpeConsultor {
   private browser: Browser | null = null;
   private context: BrowserContext | null = null;
   private readonly headless: boolean;
+  private readonly proxy: ProxyConfig | null;
 
-  constructor(opts: { headless?: boolean } = {}) {
+  constructor(opts: { headless?: boolean; proxyUrl?: string } = {}) {
     this.headless = opts.headless ?? true;
+    this.proxy = parseProxyUrl(
+      opts.proxyUrl ?? process.env.PROXY_URL ?? process.env.HTTPS_PROXY,
+    );
   }
 
   private async ensureBrowser(): Promise<BrowserContext> {
@@ -243,13 +292,19 @@ export class OnpeConsultor {
       this.browser = await chromium.launch({
         headless: this.headless,
         args,
+        ...(this.proxy ? { proxy: this.proxy } : {}),
       });
       this.context = await this.browser.newContext({
         locale: "es-PE",
+        timezoneId: "America/Lima",
         userAgent:
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
           "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        viewport: { width: 1365, height: 900 },
       });
+      if (this.proxy) {
+        console.log(`Playwright proxy: ${this.proxy.server}`);
+      }
     }
     return this.context!;
   }
@@ -257,23 +312,49 @@ export class OnpeConsultor {
   private async abrirPagina(): Promise<Page> {
     const context = await this.ensureBrowser();
     const page = await context.newPage();
-    await page.goto(ONPE_URL, { waitUntil: "domcontentloaded", timeout: 60000 });
-    const input = page.locator(
-      'input[formcontrolname="numeroDocumento"], input[placeholder="Número de DNI"]',
-    );
-    try {
-      await input.first().waitFor({ state: "visible", timeout: 45000 });
-    } catch {
-      const title = await page.title().catch(() => "");
-      if (/just a moment|robot|verific/i.test(title) || title === "") {
-        throw new ConsultaError(
-          "La ONPE bloqueó el acceso (challenge anti-bot). Reintenta en unos minutos.",
-          "ANTIBOT_BLOQUEO",
-        );
+    await page.goto(ONPE_URL, { waitUntil: "domcontentloaded", timeout: 90_000 });
+
+    const input = page.locator(DNI_INPUT);
+    const deadline = Date.now() + FORM_WAIT_MS;
+
+    // Cloudflare JS challenge: esperar a que desaparezca "Just a moment"
+    // o a que aparezca el input de DNI (lo que ocurra primero).
+    while (Date.now() < deadline) {
+      if (await input.first().isVisible().catch(() => false)) {
+        return page;
       }
-      throw new ConsultaError("No se pudo cargar el formulario de la ONPE.", "TIMEOUT");
+      const title = await page.title().catch(() => "");
+      const stillChallenging = /just a moment|checking|verific|robot|attention required/i.test(
+        title,
+      );
+      if (!stillChallenging) {
+        // Título ya no es challenge: dar un poco más por si el Angular monta tarde.
+        try {
+          await input.first().waitFor({
+            state: "visible",
+            timeout: Math.min(20_000, Math.max(1_000, deadline - Date.now())),
+          });
+          return page;
+        } catch {
+          break;
+        }
+      }
+      await new Promise((r) => setTimeout(r, 1_500));
     }
-    return page;
+
+    const diag = await pageDiagnostics(page);
+    const title = await page.title().catch(() => "");
+    if (/just a moment|robot|verific|checking|attention required/i.test(title) || title === "") {
+      throw new ConsultaError(
+        `La ONPE bloqueó el acceso (challenge anti-bot). ${diag}` +
+          (this.proxy ? "" : " Sin PROXY_URL (IP datacenter suele fallar en Fly)."),
+        "ANTIBOT_BLOQUEO",
+      );
+    }
+    throw new ConsultaError(
+      `No se pudo cargar el formulario de la ONPE. ${diag}`,
+      "TIMEOUT",
+    );
   }
 
   private async fetchInPage(
@@ -362,7 +443,7 @@ export class OnpeConsultor {
 
 export async function consultarDni(
   dni: string,
-  opts: { headless?: boolean } = {},
+  opts: { headless?: boolean; proxyUrl?: string } = {},
 ): Promise<ConsultaResultado> {
   const consultor = new OnpeConsultor(opts);
   try {

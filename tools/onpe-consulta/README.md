@@ -141,11 +141,11 @@ que arrancar el navegador en cada consulta).
 
 - Escucha en `127.0.0.1` por defecto (solo local). **No exponer a internet sin protección.**
 - Si necesitas exponerlo, define `CONSULTA_TOKEN` y envía el header `x-consulta-token`.
-- Variables de entorno: `PORT`, `HOST`, `CONSULTA_TOKEN`, `HEADFUL`.
+- Variables de entorno: `PORT`, `HOST`, `CONSULTA_TOKEN`, `HEADFUL`, `PROXY_URL`.
 
 ## Integración con el frontend de Defiende Lima
 
-Esta herramienta **no** se importa directamente en `front_end/`. El flujo recomendado:
+Esta herramienta **no** se importa directamente en el frontend Next.js. El flujo recomendado:
 
 1. Corre el servidor en el mismo host que el frontend: `npm start` (puerto 8787).
 2. Desde el frontend, llama a `POST http://127.0.0.1:8787/consultar` con el DNI.
@@ -189,7 +189,7 @@ fly secrets set CONSULTA_TOKEN="<genera un secreto largo y aleatorio>"
 fly deploy
 ```
 
-`fly.toml` ya está configurado: región `scl` (Santiago, la más cercana a Perú), `internal_port 8787`,
+`fly.toml` ya está configurado: región `gru` (São Paulo; `scl` Santiago está deprecada en Fly), `internal_port 8787`,
 healthcheck en `/health`, 1 GB de RAM (Chromium lo necesita), `auto_stop_machines=false`
 (para evitar cold starts de ~10s en cada registro).
 
@@ -201,8 +201,18 @@ toque `tools/onpe-consulta/`. Agrega en GitHub → Settings → Secrets → `FLY
 
 ```bash
 fly secrets set CONSULTA_TOKEN="<genera un secreto largo y aleatorio>"
+
+# REQUERIDO en Fly: Cloudflare bloquea IPs de datacenter. Usa un proxy
+# residencial sticky (PE o BR), p. ej. IPRoyal / Webshare:
+#   http://user:pass@host:port
+fly secrets set PROXY_URL="http://user:pass@proxy-host:port"
+
 # HOST y PORT ya vienen en el Dockerfile (0.0.0.0:8787)
 ```
+
+Sin `PROXY_URL`, el healthcheck pasa pero `/consultar` suele responder
+`ANTIBOT_BLOQUEO` / `TIMEOUT` (challenge de Cloudflare). El proxy debe ser
+**sticky** (misma IP durante la sesión) para que la cookie `cf_clearance` siga válida.
 
 El servidor **se niega a arrancar** si se expone fuera de loopback sin `CONSULTA_TOKEN`
 (fail-closed en `src/server.ts`).
@@ -210,11 +220,14 @@ El servidor **se niega a arrancar** si se expone fuera de loopback sin `CONSULTA
 ### 3. Verificar
 
 ```bash
-fly open            # abre https://<app>.fly.dev/health  -> {"ok":true}
-curl -s https://<app>.fly.dev/consultar \
+curl -s https://renovacion-popular-defiende-lima-r6z3yw.fly.dev/health
+# -> {"ok":true}
+
+curl -s -m 90 -X POST https://renovacion-popular-defiende-lima-r6z3yw.fly.dev/consultar \
   -H "x-consulta-token: <tu secreto>" \
   -H "Content-Type: application/json" \
   -d '{"dni":"71216812"}'
+# -> encontrado, numeroMesa, ubigeo, ...
 ```
 
 ### 4. Variables en Vercel (frontend)
@@ -223,7 +236,7 @@ En el proyecto del frontend (Vercel → Settings → Environment Variables):
 
 | Variable | Valor |
 |---|---|
-| `ONPE_CONSULTA_URL` | `https://<app>.fly.dev` |
+| `ONPE_CONSULTA_URL` | `https://renovacion-popular-defiende-lima-r6z3yw.fly.dev` |
 | `ONPE_CONSULTA_TOKEN` | `<el mismo CONSULTA_TOKEN de Fly>` |
 
 Tras setearlas, redeploy del frontend. La ruta `POST /api/registro` empezará a rellenar
@@ -232,8 +245,11 @@ habilite la consulta definitiva).
 
 ### Notas de costo
 
-`shared-cpu-1x` + 1 GB siempre-on ronda los **USD ~3–5/mes**. El bot solo recibe tráfico
-cuando alguien se registra, pero debe estar despierto para responder rápido.
+- Fly `shared-cpu-1x` + 1 GB siempre-on: **~USD 3–5/mes**.
+- Proxy residencial sticky (bajo volumen de registros): **~USD 5–15/mes**.
+
+El bot solo recibe tráfico cuando alguien se registra, pero debe estar despierto para
+responder rápido.
 
 ## Riesgos y consideraciones legales
 

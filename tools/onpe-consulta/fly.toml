@@ -4,7 +4,8 @@
 #
 
 app = 'renovacion-popular-defiende-lima-r6z3yw'
-primary_region = 'sjc'
+# gru = São Paulo (más cercana a Perú; scl/Santiago está deprecada en Fly)
+primary_region = 'gru'
 
 [build]
   dockerfile = 'Dockerfile'

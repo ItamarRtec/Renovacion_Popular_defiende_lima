@@ -134,4 +134,11 @@ app.listen(PORT, HOST, () => {
   console.log(`  POST /consultar  { "dni": "12345678" }`);
   console.log(`  GET  /health`);
   if (TOKEN) console.log("  Auth: header x-consulta-token activado");
+  if (process.env.PROXY_URL?.trim() || process.env.HTTPS_PROXY?.trim()) {
+    console.log("  Proxy: PROXY_URL/HTTPS_PROXY configurado (egress residencial)");
+  } else if (!isLoopback) {
+    console.warn(
+      "  Aviso: sin PROXY_URL — Cloudflare suele bloquear IPs de datacenter (Fly).",
+    );
+  }
 });
