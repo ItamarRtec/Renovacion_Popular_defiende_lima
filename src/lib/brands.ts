@@ -32,9 +32,9 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
     logoSrc: "/brands/renovacion-popular/logo-r.png",
     logoAlt: "Renovación Popular",
     heroTitle: "Renovación Popular",
-    heroHighlight: "Lima.",
+    heroHighlight: "Ya.",
     heroLede:
-      "Rafael te necesita en tu mesa. Un día, te capacitas al toque y cobras por Yape o Plin. Cada voto cuenta.",
+      "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
     announce: "Elecciones · sé personero",
     themeClass: "theme-rp",
   },

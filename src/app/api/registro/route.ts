@@ -99,6 +99,27 @@ export async function POST(request: Request) {
     );
   }
 
+  const { data: dniExistente, error: dniLookupError } = await admin
+    .from("registros")
+    .select("id")
+    .eq("dni", dni)
+    .maybeSingle();
+
+  if (dniLookupError) {
+    console.error(dniLookupError);
+    return NextResponse.json(
+      { error: "No pudimos validar tu DNI. Intenta de nuevo." },
+      { status: 500 },
+    );
+  }
+
+  if (dniExistente) {
+    return NextResponse.json(
+      { error: "El DNI está registrado.", errors: { dni: "El DNI está registrado." } },
+      { status: 409 },
+    );
+  }
+
   // Consulta ONPE (robot). Si falla o no está configurado, seguimos con nulls.
   const mesa = await consultarMesaPorDni(dni);
 
@@ -121,7 +142,29 @@ export async function POST(request: Request) {
 
   if (insertError) {
     if (insertError.code === "23505") {
-      return NextResponse.json({ ok: true });
+      const detail = `${insertError.message} ${insertError.details ?? ""}`.toLowerCase();
+      if (detail.includes("dni")) {
+        return NextResponse.json(
+          {
+            error: "El DNI está registrado.",
+            errors: { dni: "El DNI está registrado." },
+          },
+          { status: 409 },
+        );
+      }
+      if (detail.includes("email")) {
+        return NextResponse.json(
+          {
+            error: "Este correo ya está registrado.",
+            errors: { email: "Este correo ya está registrado." },
+          },
+          { status: 409 },
+        );
+      }
+      return NextResponse.json(
+        { error: "Ya existe una inscripción con estos datos." },
+        { status: 409 },
+      );
     }
     console.error(insertError);
     return NextResponse.json(

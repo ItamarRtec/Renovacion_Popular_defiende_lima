@@ -57,7 +57,8 @@ export function SiteHeader({ brand }: SiteHeaderProps) {
         <div className="flex items-center justify-end gap-2">
           {/* Botón "Entrar" oculto hasta habilitar el login públicamente. */}
           <Link className="dl-btn dl-btn-primary dl-btn-sm" href={brand.registerHref}>
-            Unirme <Chevron />
+            {brand.id === "renovacion_popular" ? "Sé personero" : "Unirme"}{" "}
+            <Chevron />
           </Link>
         </div>
       </div>

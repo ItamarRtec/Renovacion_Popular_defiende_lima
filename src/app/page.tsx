@@ -7,9 +7,9 @@ import { BRANDS } from "@/lib/brands";
 const brand = BRANDS.renovacion_popular;
 
 export const metadata: Metadata = {
-  title: "Renovación Popular — Personeros",
+  title: "Sé personero — Renovación Popular",
   description:
-    "Regístrate como personero con Renovación Popular. Cada voto en Lima cuenta.",
+    "Si eres de Lima, Rafael te necesita en tu mesa. Un día y cobras por Yape o Plin.",
 };
 
 export default function HomePage() {
