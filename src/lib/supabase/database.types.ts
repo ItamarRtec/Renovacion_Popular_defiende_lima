@@ -105,17 +105,11 @@ export type DominioAccesoInsert = {
   notas?: string | null;
 };
 
-export type VentanaAccesoRow = {
+export type PlataformaFlagsRow = {
   id: number;
-  abre_at: string | null;
-  cierra_at: string | null;
-  activa: boolean;
+  credenciales_visibles: boolean;
   updated_at: string;
 };
-
-export type VentanaAccesoUpdate = Partial<
-  Pick<VentanaAccesoRow, "abre_at" | "cierra_at" | "activa">
->;
 
 export type AsistenciaMetodo = "qr" | "manual";
 
@@ -233,10 +227,10 @@ export type Database = {
         Update: Partial<Pick<ActaRow, "storage_path" | "origen" | "tipo">>;
         Relationships: [];
       };
-      ventana_acceso: {
-        Row: VentanaAccesoRow;
-        Insert: Partial<VentanaAccesoRow>;
-        Update: VentanaAccesoUpdate;
+      plataforma_flags: {
+        Row: PlataformaFlagsRow;
+        Insert: Partial<PlataformaFlagsRow>;
+        Update: Partial<Pick<PlataformaFlagsRow, "credenciales_visibles">>;
         Relationships: [];
       };
       dominios_acceso: {
@@ -295,7 +289,7 @@ export type Database = {
         Args: { p_id: string };
         Returns: boolean;
       };
-      acceso_publico_abierto: {
+      credenciales_visibles: {
         Args: Record<string, never>;
         Returns: boolean;
       };

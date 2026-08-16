@@ -1,20 +1,8 @@
 import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
-
-const NAV_GROUPS = [
-  [
-    { href: "/plataforma", label: "Inicio", icon: "home" as const },
-    { href: "/plataforma/videos", label: "Videos", icon: "video" as const },
-    { href: "/plataforma/qr", label: "Mi QR", icon: "qr" as const },
-    {
-      href: "/plataforma/credencial",
-      label: "Credencial",
-      icon: "id" as const,
-    },
-    { href: "/plataforma/acta", label: "Acta", icon: "image" as const },
-  ],
-] as const;
+import type { SidebarNavItem } from "@/components/sidebar-nav";
 
 export default async function PlataformaLayout({
   children,
@@ -35,8 +23,19 @@ export default async function PlataformaLayout({
     ? `${registro.nombres} ${registro.apellidos}`.trim()
     : null;
 
+  const mostrarCredencial = await credencialesVisibles();
+  const nav: SidebarNavItem[] = [
+    { href: "/plataforma", label: "Inicio", icon: "home" },
+    { href: "/plataforma/videos", label: "Videos", icon: "video" },
+    { href: "/plataforma/qr", label: "Mi QR", icon: "qr" },
+    ...(mostrarCredencial
+      ? [{ href: "/plataforma/credencial", label: "Credencial", icon: "id" as const }]
+      : []),
+    { href: "/plataforma/acta", label: "Acta", icon: "image" },
+  ];
+
   return (
-    <RpAppShell name={name} navGroups={NAV_GROUPS}>
+    <RpAppShell name={name} navGroups={[nav]}>
       {children}
     </RpAppShell>
   );

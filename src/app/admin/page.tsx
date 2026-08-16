@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CredencialesToggle } from "@/components/admin/credenciales-toggle";
 import { getAdminBalanceStats } from "@/lib/admin-stats";
 import {
   getAdminControlCenter,
@@ -114,10 +115,16 @@ function FlagTable({
 
 export default async function AdminPage() {
   const { supabase } = await requireAdminDb();
-  const [ops, stats] = await Promise.all([
+  const [ops, stats, flags] = await Promise.all([
     getAdminControlCenter(supabase),
     getAdminBalanceStats(supabase),
+    supabase
+      .from("plataforma_flags")
+      .select("credenciales_visibles")
+      .eq("id", 1)
+      .maybeSingle(),
   ]);
+  const credencialesVisibles = flags.data?.credenciales_visibles ?? false;
 
   const cobertura =
     ops.personerosTitulares - ops.sinMesa > 0
@@ -135,6 +142,8 @@ export default async function AdminPage() {
         faltan. Los coordinadores escanean en campo; tú ves el tablero
         {ops.eventoNombre ? ` del evento “${ops.eventoNombre}”` : ""}.
       </p>
+
+      <CredencialesToggle visible={credencialesVisibles} />
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

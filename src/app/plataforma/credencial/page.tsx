@@ -1,10 +1,28 @@
 import Link from "next/link";
 import { CredencialAcciones } from "@/components/credencial-acciones";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
 
 export default async function PlataformaCredencialPage() {
   const { registro } = await getSessionRegistro();
+  const mostrar = await credencialesVisibles();
+
+  if (!mostrar) {
+    return (
+      <section className="mx-auto max-w-lg text-center">
+        <p className="dl-kicker">Credencial</p>
+        <h1 className="dl-title mt-3 text-3xl">Aún no disponible</h1>
+        <p className="mt-3 text-sm text-muted">
+          La credencial se publicará cuando el equipo de Renovación Popular la
+          active.
+        </p>
+        <Link className="dl-btn dl-btn-secondary mt-8" href="/plataforma">
+          Volver
+        </Link>
+      </section>
+    );
+  }
 
   if (!registro) {
     return (

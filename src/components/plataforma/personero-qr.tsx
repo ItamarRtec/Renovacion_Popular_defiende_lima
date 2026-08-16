@@ -6,6 +6,7 @@ type PersoneroQrProps = {
   nombre: string;
   eventoNombre?: string | null;
   esEnsayo?: boolean;
+  mostrarCredencial?: boolean;
 };
 
 export function PersoneroQr({
@@ -14,6 +15,7 @@ export function PersoneroQr({
   nombre,
   eventoNombre,
   esEnsayo,
+  mostrarCredencial,
 }: PersoneroQrProps) {
   const kicker = esEnsayo
     ? "Ensayo de asistencia"
@@ -47,9 +49,14 @@ export function PersoneroQr({
         <p className="mt-1 font-[family-name:var(--font-data)] text-lg tabular-nums text-[#1077A1]">
           Mesa {mesa?.trim() || "—"}
         </p>
-        <Link className="dl-btn dl-btn-primary mt-5 w-full" href="/plataforma/credencial">
-          Ver credencial
-        </Link>
+        {mostrarCredencial ? (
+          <Link
+            className="dl-btn dl-btn-primary mt-5 w-full"
+            href="/plataforma/credencial"
+          >
+            Ver credencial
+          </Link>
+        ) : null}
       </div>
 
       <p className="mx-auto mt-6 max-w-xs text-xs leading-relaxed text-muted">

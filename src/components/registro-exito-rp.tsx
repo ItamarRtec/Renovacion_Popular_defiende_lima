@@ -22,6 +22,7 @@ type RegistroExitoRpProps = {
   homeHref: string;
   /** Absolute /unirme URL for WhatsApp invite (from server host). */
   registerUrl: string;
+  mostrarCredencial?: boolean;
 };
 
 function draftFromSearchParams(
@@ -72,6 +73,7 @@ function mergeDraft(
 export function RegistroExitoRp({
   homeHref,
   registerUrl,
+  mostrarCredencial = false,
 }: RegistroExitoRpProps) {
   const searchParams = useSearchParams();
   const [draft] = useState<RegistroExitoDraft | null>(() =>
@@ -95,7 +97,8 @@ export function RegistroExitoRp({
   const esSuplente = draft?.rol_mesa === "suplente";
   const tieneMesaTitular = Boolean(draft?.numero_mesa) && !esSuplente;
   const tieneNombre = Boolean(draft?.nombres);
-  const puedeCredencial = Boolean(draft?.nombres && draft?.dni);
+  const puedeCredencial =
+    mostrarCredencial && Boolean(draft?.nombres && draft?.dni);
 
   return (
     <div className="mx-auto max-w-3xl text-center">

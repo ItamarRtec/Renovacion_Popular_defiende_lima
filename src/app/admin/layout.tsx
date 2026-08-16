@@ -41,11 +41,6 @@ const NAV_GROUPS = [
       icon: "qr" as const,
     },
     {
-      href: "/admin/ventana",
-      label: "Ventana",
-      icon: "settings" as const,
-    },
-    {
       href: "/admin/dominios",
       label: "Dominios",
       icon: "settings" as const,

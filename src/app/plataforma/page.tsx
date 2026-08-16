@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ACTA_TIPOS } from "@/lib/actas";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -24,23 +25,23 @@ export default async function PlataformaHomePage() {
   }
 
   const supabase = await createSupabaseServerClient();
-  const [{ data: videos }, { data: progresos }, { data: actas }, qrDataUrl] =
-    await Promise.all([
-      supabase
-        .from("videos")
-        .select("id")
-        .eq("activo", true),
-      supabase
-        .from("video_progresos")
-        .select("video_id, visto")
-        .eq("registro_id", registro.id)
-        .eq("visto", true),
-      supabase
-        .from("actas")
-        .select("id, tipo")
-        .eq("registro_id", registro.id),
-      renderPersoneroQrDataUrl(registro.id),
-    ]);
+  const [
+    { data: videos },
+    { data: progresos },
+    { data: actas },
+    qrDataUrl,
+    mostrarCredencial,
+  ] = await Promise.all([
+    supabase.from("videos").select("id").eq("activo", true),
+    supabase
+      .from("video_progresos")
+      .select("video_id, visto")
+      .eq("registro_id", registro.id)
+      .eq("visto", true),
+    supabase.from("actas").select("id, tipo").eq("registro_id", registro.id),
+    renderPersoneroQrDataUrl(registro.id),
+    credencialesVisibles(supabase),
+  ]);
 
   const totalVideos = videos?.length ?? 0;
   const vistos = progresos?.length ?? 0;
@@ -78,12 +79,14 @@ export default async function PlataformaHomePage() {
               Mesa {registro.numero_mesa?.trim() || "—"}
             </p>
             <div className="mt-5 flex flex-col gap-2">
-              <Link
-                className="dl-btn dl-btn-primary w-full"
-                href="/plataforma/credencial"
-              >
-                Ver credencial
-              </Link>
+              {mostrarCredencial ? (
+                <Link
+                  className="dl-btn dl-btn-primary w-full"
+                  href="/plataforma/credencial"
+                >
+                  Ver credencial
+                </Link>
+              ) : null}
               <Link
                 className="text-sm text-[#1077A1] underline underline-offset-2"
                 href="/plataforma/qr"
@@ -97,29 +100,33 @@ export default async function PlataformaHomePage() {
             <p className="mt-4 text-sm text-muted">
               No se pudo generar tu QR. Falta la clave de firma en el servidor.
             </p>
-            <Link
-              className="dl-btn dl-btn-primary mt-5 w-full"
-              href="/plataforma/credencial"
-            >
-              Ver credencial
-            </Link>
+            {mostrarCredencial ? (
+              <Link
+                className="dl-btn dl-btn-primary mt-5 w-full"
+                href="/plataforma/credencial"
+              >
+                Ver credencial
+              </Link>
+            ) : null}
           </>
         )}
       </div>
 
       <div className="mt-10 space-y-4">
-        <Link
-          className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"
-          href="/plataforma/credencial"
-        >
-          <p className="text-xs uppercase tracking-wider text-muted">
-            Credencial
-          </p>
-          <p className="mt-2 text-lg font-medium">Ver y descargar</p>
-          <p className="mt-1 text-sm text-muted">
-            Documento de personero de mesa con tu QR
-          </p>
-        </Link>
+        {mostrarCredencial ? (
+          <Link
+            className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"
+            href="/plataforma/credencial"
+          >
+            <p className="text-xs uppercase tracking-wider text-muted">
+              Credencial
+            </p>
+            <p className="mt-2 text-lg font-medium">Ver y descargar</p>
+            <p className="mt-1 text-sm text-muted">
+              Documento de personero de mesa con tu QR
+            </p>
+          </Link>
+        ) : null}
 
         <Link
           className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"

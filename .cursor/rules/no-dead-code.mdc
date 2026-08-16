@@ -1,0 +1,21 @@
+---
+description: Eliminar código muerto; no parchear encima
+alwaysApply: true
+---
+
+# Eliminar lo muerto
+
+Si un flujo, ruta, helper, flag o pantalla ya no se usa, **bórralo**. No lo dejes “por si acaso” ni le pongas un parche encima.
+
+- Quitar UI implica quitar su API, imports, nav y tipos que solo servían a eso.
+- No cuelgues features nuevas en tablas/módulos de un flujo muerto.
+- No dejes `requiereSeguro`, ventanas de acceso, OTP o flags que el producto ya no consulta.
+- Ante duda entre ocultar y borrar: **borrar**.
+
+```ts
+// ❌ BAD — el login seguro ya no existe, pero queda la ruta
+// src/app/api/auth/request-link/route.ts
+
+// ✅ GOOD — se eliminó request-link, /admin/ventana y acceso.ts
+// porque el acceso es correo + DNI y el admin entra por /admin1010
+```

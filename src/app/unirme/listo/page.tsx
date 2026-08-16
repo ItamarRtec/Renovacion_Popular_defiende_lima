@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 import { RegistroExitoRp } from "@/components/registro-exito-rp";
 import { BRANDS } from "@/lib/brands";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 
 const brand = BRANDS.renovacion_popular;
 
@@ -22,7 +23,10 @@ async function absoluteRegisterUrl() {
 }
 
 export default async function RegistroListoPage() {
-  const registerUrl = await absoluteRegisterUrl();
+  const [registerUrl, mostrarCredencial] = await Promise.all([
+    absoluteRegisterUrl(),
+    credencialesVisibles(),
+  ]);
 
   return (
     <>
@@ -58,6 +62,7 @@ export default async function RegistroListoPage() {
               <RegistroExitoRp
                 homeHref={brand.homeHref}
                 registerUrl={registerUrl}
+                mostrarCredencial={mostrarCredencial}
               />
             </Suspense>
           </section>

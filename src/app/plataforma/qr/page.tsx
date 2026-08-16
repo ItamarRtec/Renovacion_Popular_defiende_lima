@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PersoneroQr } from "@/components/plataforma/personero-qr";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { getEventoActivo } from "@/lib/eventos";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
@@ -37,7 +38,10 @@ export default async function PlataformaQrPage() {
   }
 
   const supabase = await createSupabaseServerClient();
-  const evento = await getEventoActivo(supabase);
+  const [evento, mostrarCredencial] = await Promise.all([
+    getEventoActivo(supabase),
+    credencialesVisibles(supabase),
+  ]);
   let asisQuery = supabase
     .from("asistencias")
     .select("llegada_at, metodo")
@@ -69,6 +73,7 @@ export default async function PlataformaQrPage() {
         nombre={nombre}
         eventoNombre={evento?.nombre ?? null}
         esEnsayo={evento?.tipo === "ensayo"}
+        mostrarCredencial={mostrarCredencial}
       />
     </div>
   );
