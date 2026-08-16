@@ -15,8 +15,9 @@ export default async function PlataformaActaPage() {
     .eq("registro_id", registro.id)
     .order("created_at", { ascending: false });
 
-  const latestByTipo = new Map<ActaTipo, (typeof rows)[number]>();
-  for (const row of rows ?? []) {
+  const actas = rows ?? [];
+  const latestByTipo = new Map<ActaTipo, (typeof actas)[number]>();
+  for (const row of actas) {
     if (!isActaTipo(row.tipo) || latestByTipo.has(row.tipo)) continue;
     latestByTipo.set(row.tipo, row);
   }

@@ -29,7 +29,7 @@ async function rejectSlow(status: number, body: Record<string, unknown>) {
  *  - Personeros y coordinadores entran siempre. El evento solo acota el QR.
  *  - Throttle por IP CONFIABLE (Vercel) contando SOLO fallos reales.
  *  - Mensaje genérico + retraso ante fallo (no revela si el correo existe).
- *  - Administradores de registros siguen por OTP. La clave nunca se guarda en Auth.
+ *  - Administradores no entran por esta vía (usan /admin1010). La clave nunca se guarda en Auth.
  */
 export async function POST(request: Request) {
   let body: RequestBody;
@@ -118,14 +118,8 @@ export async function POST(request: Request) {
       reg.plataforma_rol !== "personero" &&
       reg.plataforma_rol !== "coordinador"
     ) {
-      return NextResponse.json(
-        {
-          error:
-            "Tu cuenta usa acceso seguro por enlace. Entra con DNI + correo.",
-          requiereSeguro: true,
-        },
-        { status: 403 },
-      );
+      await contarFallo();
+      return rejectSlow(401, { error: "Correo o clave incorrectos." });
     }
 
     // Éxito: NO se incrementa el contador (quien acierta no se penaliza).

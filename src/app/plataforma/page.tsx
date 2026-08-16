@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ACTA_TIPOS } from "@/lib/actas";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -44,9 +45,7 @@ export default async function PlataformaHomePage() {
   const totalVideos = videos?.length ?? 0;
   const vistos = progresos?.length ?? 0;
   const tiposActa = new Set((actas ?? []).map((a) => a.tipo));
-  const actasCargadas = ["instalacion_sufragio", "escrutinio"].filter((t) =>
-    tiposActa.has(t),
-  ).length;
+  const actasCargadas = ACTA_TIPOS.filter((t) => tiposActa.has(t)).length;
 
   return (
     <section className="mx-auto max-w-2xl">
