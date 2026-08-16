@@ -37,11 +37,12 @@ export function CredencialesToggle({ visible }: { visible: boolean }) {
         Credenciales
       </p>
       <h2 className="mt-2 text-lg font-medium text-[#0b2a36]">
-        Mostrar credencial a personeros
+        Mostrar las 3 credenciales
       </h2>
       <p className="mt-2 text-sm text-muted">
-        Cuando está activa, los personeros ven y descargan su credencial en la
-        plataforma. Mientras esté apagada, el documento no aparece.
+        Cuando está activa, personeros, coordinadores de local y coordinadores
+        de distrito ven y descargan su credencial. Mientras esté apagada, el
+        documento no aparece.
       </p>
       <div
         className={`mt-4 rounded-[var(--radius-md)] border px-4 py-3 text-sm ${

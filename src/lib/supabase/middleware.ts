@@ -4,6 +4,7 @@ import {
   isAdminHostAllowed,
   isAdminSurfacePath,
 } from "@/lib/admin-access";
+import { isStaffRole } from "@/lib/roles";
 import {
   ADMIN_SESSION_COOKIE,
   parseAdminSessionToken,
@@ -105,10 +106,7 @@ export async function updateSession(request: NextRequest) {
 
     const redirectUrl = request.nextUrl.clone();
     // Administradores de registros ya no usan /admin (panel propio en /admin1010).
-    redirectUrl.pathname =
-      rol === "administrador" || rol === "coordinador"
-        ? "/coordinacion"
-        : "/plataforma";
+    redirectUrl.pathname = isStaffRole(rol) ? "/coordinacion" : "/plataforma";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

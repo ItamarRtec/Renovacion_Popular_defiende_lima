@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ACTA_TIPOS, ACTA_TIPO_LABEL, isActaTipo, type ActaTipo } from "@/lib/actas";
 import { getEventoActivo } from "@/lib/eventos";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -46,11 +45,7 @@ export default async function CoordinacionPersoneroDetailPage({
         .from("video_progresos")
         .select("video_id, visto")
         .eq("registro_id", id),
-      supabase
-        .from("actas")
-        .select("id, storage_path, created_at, tipo")
-        .eq("registro_id", id)
-        .order("created_at", { ascending: false }),
+      supabase.from("actas").select("id, tipo").eq("registro_id", id),
       asisQuery.maybeSingle(),
     ]);
 
@@ -58,28 +53,8 @@ export default async function CoordinacionPersoneroDetailPage({
     (progresos ?? []).filter((p) => p.visto).map((p) => p.video_id),
   );
 
-  const latestByTipo = new Map<
-    ActaTipo,
-    { storage_path: string; tipo: string }
-  >();
-  for (const row of actas ?? []) {
-    if (!isActaTipo(row.tipo) || latestByTipo.has(row.tipo)) continue;
-    latestByTipo.set(row.tipo, row);
-  }
-
-  const actasFirmadas = await Promise.all(
-    ACTA_TIPOS.map(async (tipo) => {
-      const row = latestByTipo.get(tipo) ?? null;
-      let signedUrl: string | null = null;
-      if (row?.storage_path) {
-        const { data } = await supabase.storage
-          .from("actas")
-          .createSignedUrl(row.storage_path, 300);
-        signedUrl = data?.signedUrl ?? null;
-      }
-      return { tipo, signedUrl };
-    }),
-  );
+  const mesa = personero.numero_mesa?.trim() ?? "";
+  const actasCargadas = new Set((actas ?? []).map((a) => a.tipo)).size;
 
   return (
     <section className="mx-auto max-w-2xl space-y-10">
@@ -155,27 +130,22 @@ export default async function CoordinacionPersoneroDetailPage({
         </ul>
       </div>
 
-      <div className="space-y-6">
+      <div>
         <h2 className="text-lg font-medium">Actas</h2>
-        {actasFirmadas.map(({ tipo, signedUrl }) => (
-          <div key={tipo}>
-            <p className="text-sm font-medium text-[#0b2a36]">
-              {ACTA_TIPO_LABEL[tipo]}
-            </p>
-            {signedUrl ? (
-              <div className="mt-3 overflow-hidden rounded-[var(--radius-lg)] border border-border">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  alt={ACTA_TIPO_LABEL[tipo]}
-                  className="max-h-[22rem] w-full object-contain bg-black"
-                  src={signedUrl}
-                />
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-muted">Aún no subió esta acta.</p>
-            )}
-          </div>
-        ))}
+        <p className="mt-2 text-sm text-muted">
+          {actasCargadas} de 2 cargadas.
+          {mesa
+            ? " Para colgar o reemplazar, selecciona esta mesa."
+            : " Este personero no tiene mesa asignada."}
+        </p>
+        {mesa ? (
+          <Link
+            className="dl-btn dl-btn-primary mt-4"
+            href={`/coordinacion/actas?mesa=${encodeURIComponent(mesa)}`}
+          >
+            Colgar mesa {mesa}
+          </Link>
+        ) : null}
       </div>
     </section>
   );

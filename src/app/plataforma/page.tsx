@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ACTA_TIPOS } from "@/lib/actas";
+import { ACTA_TIPOS, normalizeNumeroMesa } from "@/lib/actas";
 import { credencialesVisibles } from "@/lib/credencial-visible";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
@@ -38,7 +38,11 @@ export default async function PlataformaHomePage() {
       .select("video_id, visto")
       .eq("registro_id", registro.id)
       .eq("visto", true),
-    supabase.from("actas").select("id, tipo").eq("registro_id", registro.id),
+    supabase
+      .from("actas")
+      .select("id, tipo")
+      .eq("registro_id", registro.id)
+      .eq("numero_mesa", normalizeNumeroMesa(registro.numero_mesa)),
     renderPersoneroQrDataUrl(registro.id),
     credencialesVisibles(supabase),
   ]);

@@ -1,4 +1,5 @@
 import type { AdminDb } from "@/lib/admin-session";
+import { isCoordinadorDistrital, isCoordinadorLocal } from "@/lib/roles";
 
 export type AdminBalanceStats = {
   mesasCubiertas: number;
@@ -6,6 +7,8 @@ export type AdminBalanceStats = {
   mesasRestantes: number | null;
   personeros: number;
   coordinadores: number;
+  coordinadoresLocales: number;
+  coordinadoresDistritales: number;
   suplentesPersoneros: number;
   suplentesCoordinadores: number;
   personerosSinMesa: number;
@@ -29,7 +32,7 @@ export async function getAdminBalanceStats(
   const { data, error } = await supabase
     .from("registros")
     .select("plataforma_rol, rol_mesa, numero_mesa")
-    .in("plataforma_rol", ["personero", "coordinador"]);
+    .neq("plataforma_rol", "administrador");
 
   if (error) {
     console.error(error);
@@ -39,13 +42,18 @@ export async function getAdminBalanceStats(
   const rows = data ?? [];
   const mesasTitulares = new Set<string>();
   let personeros = 0;
-  let coordinadores = 0;
+  let coordinadoresLocales = 0;
+  let coordinadoresDistritales = 0;
   let suplentesPersoneros = 0;
   let personerosSinMesa = 0;
 
   for (const row of rows) {
-    if (row.plataforma_rol === "coordinador") {
-      coordinadores += 1;
+    if (isCoordinadorDistrital(row.plataforma_rol)) {
+      coordinadoresDistritales += 1;
+      continue;
+    }
+    if (isCoordinadorLocal(row.plataforma_rol)) {
+      coordinadoresLocales += 1;
       continue;
     }
     if (row.rol_mesa === "suplente") {
@@ -67,7 +75,9 @@ export async function getAdminBalanceStats(
     mesasObjetivo,
     mesasRestantes,
     personeros,
-    coordinadores,
+    coordinadores: coordinadoresLocales + coordinadoresDistritales,
+    coordinadoresLocales,
+    coordinadoresDistritales,
     suplentesPersoneros,
     suplentesCoordinadores: 0,
     personerosSinMesa,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { ACTA_TIPO_LABEL, type ActaTipo } from "@/lib/actas";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -14,22 +14,106 @@ export type ActaView = {
 export function ActaUpload({
   registroId,
   tipo,
+  numeroMesa,
   initialActa,
 }: {
   registroId: string;
   tipo: ActaTipo;
+  numeroMesa: string;
   initialActa: ActaView | null;
 }) {
   const [acta, setActa] = useState(initialActa);
   const [uploading, setUploading] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const label = ACTA_TIPO_LABEL[tipo];
+
+  function stopCamera() {
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraOpen(false);
+  }
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    };
+  }, []);
+
+  async function openCamera() {
+    setError(null);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Este navegador no permite abrir la cámara. Usa Subir foto.");
+      return;
+    }
+    try {
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: { facingMode: { ideal: "environment" } },
+        });
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: true,
+        });
+      }
+      streamRef.current = stream;
+      setCameraOpen(true);
+    } catch {
+      setError(
+        "No pudimos abrir la cámara. Acepta el permiso o usa Subir foto.",
+      );
+    }
+  }
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    if (!cameraOpen || !video || !stream) return;
+    video.srcObject = stream;
+    void video.play().catch(() => undefined);
+  }, [cameraOpen]);
+
+  async function capturePhoto() {
+    const video = videoRef.current;
+    if (!video || video.videoWidth < 2) {
+      setError("La cámara aún no está lista. Espera un segundo.");
+      return;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      setError("No pudimos tomar la foto. Intenta de nuevo.");
+      return;
+    }
+    ctx.drawImage(video, 0, 0);
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.92),
+    );
+    stopCamera();
+    if (!blob) {
+      setError("No pudimos tomar la foto. Intenta de nuevo.");
+      return;
+    }
+    await uploadFile(new File([blob], "acta.jpg", { type: "image/jpeg" }));
+  }
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+    await uploadFile(file);
+  }
 
+  async function uploadFile(file: File) {
     if (!file.type.startsWith("image/")) {
       setError("Sube una imagen (JPG, PNG o WEBP).");
       return;
@@ -69,8 +153,9 @@ export function ActaUpload({
             storage_path: path,
             origen: "web",
             tipo,
+            numero_mesa: numeroMesa,
           },
-          { onConflict: "registro_id,tipo" },
+          { onConflict: "registro_id,tipo,numero_mesa" },
         )
         .select("id, storage_path, created_at")
         .single();
@@ -111,7 +196,17 @@ export function ActaUpload({
         <h2 className="mt-1 text-lg font-medium text-[#0b2a36]">{label}</h2>
       </div>
 
-      {acta?.signedUrl ? (
+      {cameraOpen ? (
+        <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-black">
+          <video
+            ref={videoRef}
+            autoPlay
+            className="max-h-[22rem] w-full object-cover"
+            muted
+            playsInline
+          />
+        </div>
+      ) : acta?.signedUrl ? (
         <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -127,20 +222,47 @@ export function ActaUpload({
       )}
 
       <div>
-        <label className="dl-btn dl-btn-primary inline-flex cursor-pointer">
-          {uploading
-            ? "Subiendo…"
-            : acta
-              ? "Reemplazar foto"
-              : "Subir foto"}
-          <input
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-            className="sr-only"
-            disabled={uploading}
-            type="file"
-            onChange={handleFile}
-          />
-        </label>
+        {cameraOpen ? (
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="dl-btn dl-btn-primary"
+              disabled={uploading}
+              type="button"
+              onClick={() => void capturePhoto()}
+            >
+              Capturar
+            </button>
+            <button
+              className="dl-btn dl-btn-secondary"
+              disabled={uploading}
+              type="button"
+              onClick={stopCamera}
+            >
+              Cancelar
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="dl-btn dl-btn-primary"
+              disabled={uploading}
+              type="button"
+              onClick={() => void openCamera()}
+            >
+              {uploading ? "Subiendo…" : "Tomar foto"}
+            </button>
+            <label className="dl-btn dl-btn-secondary inline-flex cursor-pointer">
+              {uploading ? "Subiendo…" : acta ? "Subir otra" : "Subir foto"}
+              <input
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                className="sr-only"
+                disabled={uploading}
+                type="file"
+                onChange={handleFile}
+              />
+            </label>
+          </div>
+        )}
         <p className="mt-3 text-xs text-muted">
           JPG, PNG o WEBP · máximo 10 MB.
         </p>

@@ -1,9 +1,10 @@
+import { isCoordinacionRole } from "@/lib/roles";
 import type { PlataformaRol } from "@/lib/supabase/database.types";
 
 /** Pure helper — safe to import from client components. */
 export function homePathForRole(rol: PlataformaRol | null | undefined): string {
   if (rol === "administrador") return "/admin";
-  if (rol === "coordinador") return "/coordinacion";
+  if (isCoordinacionRole(rol)) return "/coordinacion";
   return "/plataforma";
 }
 

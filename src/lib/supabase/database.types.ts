@@ -1,6 +1,12 @@
 export type ParticipacionRol = "personero" | "miembro-mesa" | "ciudadano";
 
-export type PlataformaRol = "personero" | "coordinador" | "administrador";
+export type PlataformaRol =
+  | "personero"
+  | "coordinador_local"
+  | "coordinador_distrital"
+  | "administrador"
+  /** Legado en producción hasta correr la migración de CL/CD. */
+  | "coordinador";
 
 export type RegistroEstado =
   | "pendiente"
@@ -84,6 +90,7 @@ export type ActaRow = {
   storage_path: string;
   origen: ActaOrigen;
   tipo: ActaTipo;
+  numero_mesa: string;
   created_at: string;
   updated_at: string;
 };
@@ -223,8 +230,11 @@ export type Database = {
           storage_path: string;
           origen?: ActaOrigen;
           tipo?: ActaTipo;
+          numero_mesa?: string;
         };
-        Update: Partial<Pick<ActaRow, "storage_path" | "origen" | "tipo">>;
+        Update: Partial<
+          Pick<ActaRow, "storage_path" | "origen" | "tipo" | "numero_mesa">
+        >;
         Relationships: [];
       };
       plataforma_flags: {
@@ -284,6 +294,14 @@ export type Database = {
       current_plataforma_rol: {
         Args: Record<string, never>;
         Returns: PlataformaRol;
+      };
+      es_rol_coordinacion: {
+        Args: { p_rol: PlataformaRol };
+        Returns: boolean;
+      };
+      es_rol_staff: {
+        Args: { p_rol: PlataformaRol };
+        Returns: boolean;
       };
       registro_visible_to_caller: {
         Args: { p_id: string };

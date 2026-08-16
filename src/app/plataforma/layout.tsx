@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
 import { credencialesVisibles } from "@/lib/credencial-visible";
 import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
+import { isStaffRole } from "@/lib/roles";
 import type { SidebarNavItem } from "@/components/sidebar-nav";
 
 export default async function PlataformaLayout({
@@ -15,7 +16,7 @@ export default async function PlataformaLayout({
     redirect("/entrar");
   }
 
-  if (plataformaRol === "coordinador" || plataformaRol === "administrador") {
+  if (isStaffRole(plataformaRol)) {
     redirect(homePathForRole(plataformaRol));
   }
 

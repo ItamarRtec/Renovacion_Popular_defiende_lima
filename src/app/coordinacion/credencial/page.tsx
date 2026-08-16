@@ -1,7 +1,7 @@
 import { CredencialVista } from "@/components/credencial-vista";
 import { getSessionRegistro } from "@/lib/plataforma";
 
-export default async function PlataformaCredencialPage() {
+export default async function CoordinacionCredencialPage() {
   const { registro } = await getSessionRegistro();
-  return <CredencialVista registro={registro} homeHref="/plataforma" />;
+  return <CredencialVista registro={registro} homeHref="/coordinacion" />;
 }

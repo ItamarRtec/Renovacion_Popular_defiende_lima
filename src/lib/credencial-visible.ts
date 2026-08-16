@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-/** ¿El admin activó la credencial para personeros? Ante error, se oculta. */
+/** ¿El admin activó las 3 credenciales de campo? Ante error, se oculta. */
 export async function credencialesVisibles(
   supabase?: SupabaseClient<Database>,
 ): Promise<boolean> {

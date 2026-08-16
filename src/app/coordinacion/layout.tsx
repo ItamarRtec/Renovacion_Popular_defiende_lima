@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
+import type { SidebarNavItem } from "@/components/sidebar-nav";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
+import { isAdminRole, isStaffRole } from "@/lib/roles";
 
 export default async function CoordinacionLayout({
   children,
@@ -11,51 +14,53 @@ export default async function CoordinacionLayout({
 
   if (!userId) redirect("/entrar");
 
-  if (plataformaRol === "personero") {
-    redirect(homePathForRole("personero"));
-  }
-
-  if (plataformaRol !== "coordinador" && plataformaRol !== "administrador") {
-    redirect("/plataforma");
+  if (!isStaffRole(plataformaRol)) {
+    redirect(homePathForRole(plataformaRol));
   }
 
   const name = registro
     ? `${registro.nombres} ${registro.apellidos}`.trim()
     : null;
 
-  const navGroups =
-    plataformaRol === "administrador"
-      ? ([
-          [
-            { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
-            {
-              href: "/coordinacion/eventos",
-              label: "Registrar evento",
-              icon: "qr" as const,
-            },
-            {
-              href: "/coordinacion/personeros",
-              label: "Personeros",
-              icon: "users" as const,
-            },
-          ],
-          [{ href: "/admin", label: "Administración", icon: "shield" as const }],
-        ] as const)
-      : ([
-          [
-            { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
-            {
-              href: "/coordinacion/eventos",
-              label: "Registrar evento",
-              icon: "qr" as const,
-            },
-            {
-              href: "/coordinacion/personeros",
-              label: "Personeros",
-              icon: "users" as const,
-            },
-          ],
-        ] as const);
+  const mostrarCredencial =
+    !isAdminRole(plataformaRol) && (await credencialesVisibles());
+
+  const coordinacionNav: SidebarNavItem[] = [
+    { href: "/coordinacion", label: "Resumen", icon: "chart" },
+    {
+      href: "/coordinacion/eventos",
+      label: "Registrar evento",
+      icon: "qr",
+    },
+    {
+      href: "/coordinacion/personeros",
+      label: "Personeros",
+      icon: "users",
+    },
+    {
+      href: "/coordinacion/actas",
+      label: "Colgar otra mesa",
+      icon: "image",
+    },
+    ...(mostrarCredencial
+      ? [
+          {
+            href: "/coordinacion/credencial",
+            label: "Credencial",
+            icon: "id" as const,
+          },
+        ]
+      : []),
+  ];
+
+  const navGroups: readonly (readonly SidebarNavItem[])[] = isAdminRole(
+    plataformaRol,
+  )
+    ? [
+        coordinacionNav,
+        [{ href: "/admin", label: "Administración", icon: "shield" }],
+      ]
+    : [coordinacionNav];
 
   return (
     <RpAppShell name={name} navGroups={navGroups}>

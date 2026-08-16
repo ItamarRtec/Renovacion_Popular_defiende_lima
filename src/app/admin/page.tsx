@@ -217,8 +217,12 @@ export default async function AdminPage() {
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Personeros" value={formatNum(stats.personeros)} />
         <StatCard
-          label="Coordinadores"
-          value={formatNum(stats.coordinadores)}
+          label="Coord. de local"
+          value={formatNum(stats.coordinadoresLocales)}
+        />
+        <StatCard
+          label="Coord. de distrito"
+          value={formatNum(stats.coordinadoresDistritales)}
         />
         <StatCard
           label="Suplentes"

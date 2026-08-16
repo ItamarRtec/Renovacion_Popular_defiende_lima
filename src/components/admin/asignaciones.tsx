@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-type Personero = {
+type Asignable = {
   id: string;
   nombres: string;
   apellidos: string;
@@ -13,7 +13,7 @@ type Personero = {
   coordinador_id: string | null;
 };
 
-type Coordinador = {
+type Superior = {
   id: string;
   nombres: string;
   apellidos: string;
@@ -21,12 +21,18 @@ type Coordinador = {
   provincia: string | null;
 };
 
-export function AdminAsignaciones({
-  personeros,
-  coordinadores,
+function AssignmentTable({
+  rows,
+  superiors,
+  emptyLabel,
+  superiorLabel,
+  subjectLabel,
 }: {
-  personeros: Personero[];
-  coordinadores: Coordinador[];
+  rows: Asignable[];
+  superiors: Superior[];
+  emptyLabel: string;
+  superiorLabel: string;
+  subjectLabel: string;
 }) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -35,25 +41,25 @@ export function AdminAsignaciones({
 
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    if (!q) return personeros;
-    return personeros.filter(
+    if (!q) return rows;
+    return rows.filter(
       (p) =>
         p.dni.includes(q) ||
         p.nombres.toLowerCase().includes(q) ||
         p.apellidos.toLowerCase().includes(q) ||
         (p.distrito?.toLowerCase().includes(q) ?? false),
     );
-  }, [filter, personeros]);
+  }, [filter, rows]);
 
-  async function assign(personeroId: string, coordinadorId: string) {
+  async function assign(registroId: string, coordinadorId: string) {
     setError(null);
-    setBusyId(personeroId);
+    setBusyId(registroId);
     try {
       const res = await fetch("/api/admin/asignaciones", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personeroId,
+          registroId,
           coordinadorId: coordinadorId === "" ? null : coordinadorId,
         }),
       });
@@ -90,45 +96,103 @@ export function AdminAsignaciones({
         <table className="w-full min-w-[44rem] text-left text-sm">
           <thead className="border-b border-border bg-[var(--surface-muted)] text-xs uppercase tracking-wider text-muted">
             <tr>
-              <th className="px-4 py-3 font-medium">Personero</th>
+              <th className="px-4 py-3 font-medium">{subjectLabel}</th>
               <th className="px-4 py-3 font-medium">Territorio</th>
-              <th className="px-4 py-3 font-medium">Coordinador manual</th>
+              <th className="px-4 py-3 font-medium">{superiorLabel}</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
-              <tr key={p.id} className="border-b border-border last:border-0">
-                <td className="px-4 py-3">
-                  <p className="font-medium">
-                    {p.apellidos}, {p.nombres}
-                  </p>
-                  <p className="text-xs tabular-nums text-muted">{p.dni}</p>
-                </td>
-                <td className="px-4 py-3 text-muted">
-                  {p.distrito && p.provincia
-                    ? `${p.distrito}, ${p.provincia}`
-                    : "Sin ubicación"}
-                </td>
-                <td className="px-4 py-3">
-                  <select
-                    className="dl-input py-2"
-                    disabled={busyId === p.id}
-                    value={p.coordinador_id ?? ""}
-                    onChange={(event) => assign(p.id, event.target.value)}
-                  >
-                    <option value="">Solo territorio</option>
-                    {coordinadores.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.apellidos}, {c.nombres}
-                        {c.distrito ? ` — ${c.distrito}` : ""}
-                      </option>
-                    ))}
-                  </select>
+            {filtered.length === 0 ? (
+              <tr>
+                <td className="px-4 py-6 text-muted" colSpan={3}>
+                  {emptyLabel}
                 </td>
               </tr>
-            ))}
+            ) : (
+              filtered.map((p) => (
+                <tr key={p.id} className="border-b border-border last:border-0">
+                  <td className="px-4 py-3">
+                    <p className="font-medium">
+                      {p.apellidos}, {p.nombres}
+                    </p>
+                    <p className="text-xs tabular-nums text-muted">{p.dni}</p>
+                  </td>
+                  <td className="px-4 py-3 text-muted">
+                    {p.distrito && p.provincia
+                      ? `${p.distrito}, ${p.provincia}`
+                      : "Sin ubicación"}
+                  </td>
+                  <td className="px-4 py-3">
+                    <select
+                      className="dl-input py-2"
+                      disabled={busyId === p.id}
+                      value={p.coordinador_id ?? ""}
+                      onChange={(event) => assign(p.id, event.target.value)}
+                    >
+                      <option value="">{emptyLabel}</option>
+                      {superiors.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.apellidos}, {c.nombres}
+                          {c.distrito ? ` — ${c.distrito}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+export function AdminAsignaciones({
+  personeros,
+  coordinadoresLocales,
+  coordinadoresDistritales,
+}: {
+  personeros: Asignable[];
+  coordinadoresLocales: Asignable[];
+  coordinadoresDistritales: Superior[];
+}) {
+  return (
+    <div className="space-y-12">
+      <div>
+        <h2 className="dl-title text-xl">Personero → coordinador de local</h2>
+        <p className="mt-2 text-sm text-muted">
+          Elige un coordinador de local para que ese personero quede en su
+          equipo. Si dejas “Sin coordinador”, lo ve cualquier CL del mismo
+          distrito (acá: Chorrillos, Lima). Hasta 15 personeros por local.
+        </p>
+        <div className="mt-5">
+          <AssignmentTable
+            rows={personeros}
+            superiors={coordinadoresLocales}
+            subjectLabel="Personero"
+            superiorLabel="Coordinador de local"
+            emptyLabel="Sin coordinador (lo ve el CL de su distrito)"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h2 className="dl-title text-xl">
+          Coordinador de local → coordinador de distrito
+        </h2>
+        <p className="mt-2 text-sm text-muted">
+          Hasta 45 coordinadores de local por distrito.
+        </p>
+        <div className="mt-5">
+          <AssignmentTable
+            rows={coordinadoresLocales}
+            superiors={coordinadoresDistritales}
+            subjectLabel="Coordinador de local"
+            superiorLabel="Coordinador de distrito"
+            emptyLabel="Sin distrito asignado"
+          />
+        </div>
       </div>
     </div>
   );

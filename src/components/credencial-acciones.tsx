@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { CredencialPersonero } from "@/components/credencial-personero";
+import { CredencialDocumento } from "@/components/credencial-documento";
 import type { CredencialData } from "@/lib/credencial";
 
 export function CredencialAcciones({
@@ -59,7 +59,7 @@ export function CredencialAcciones({
           }
         }
       `}</style>
-      <CredencialPersonero data={data} qrDataUrl={qrDataUrl} />
+      <CredencialDocumento data={data} qrDataUrl={qrDataUrl} />
       <div className="credencial-actions no-print mx-auto mt-6 flex max-w-md flex-col gap-3">
         <button
           className="dl-btn dl-btn-primary w-full"

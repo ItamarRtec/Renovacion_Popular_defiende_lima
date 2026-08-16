@@ -1,5 +1,8 @@
 import Image from "next/image";
 import {
+  credencialBoxValue,
+  credencialCopy,
+  credencialTipo,
   fechaEmisionEs,
   nombreCompleto,
   personeroLegal,
@@ -7,19 +10,21 @@ import {
   type CredencialData,
 } from "@/lib/credencial";
 
-type CredencialPersoneroProps = {
+type CredencialDocumentoProps = {
   data: CredencialData;
   qrDataUrl: string | null;
 };
 
-export function CredencialPersonero({
+export function CredencialDocumento({
   data,
   qrDataUrl,
-}: CredencialPersoneroProps) {
+}: CredencialDocumentoProps) {
   const legal = personeroLegal();
-  const mesa = data.numero_mesa?.trim() || "Por asignar";
+  const copy = credencialCopy(data);
+  const tipo = credencialTipo(data);
+  const boxValue = credencialBoxValue(data);
   const local = data.centro_votacion?.trim() || "Por confirmar";
-  const esSuplente = data.rol_mesa === "suplente";
+  const esSuplente = tipo === "personero" && data.rol_mesa === "suplente";
 
   return (
     <article
@@ -70,7 +75,7 @@ export function CredencialPersonero({
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight">CREDENCIAL</h1>
           <p className="mt-1 text-[13px] font-semibold underline underline-offset-2">
-            PERSONERO DE MESA DE SUFRAGIO
+            {copy.cargo}
           </p>
         </div>
         {qrDataUrl ? (
@@ -78,7 +83,7 @@ export function CredencialPersonero({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={qrDataUrl}
-            alt="QR de asistencia del personero"
+            alt={`QR de ${copy.cargo.toLowerCase()}`}
             className="credencial-qr h-20 w-20 shrink-0 border border-black bg-white p-0.5"
             width={80}
             height={80}
@@ -88,12 +93,12 @@ export function CredencialPersonero({
         )}
       </header>
 
-      <div className="credencial-box mx-auto mt-4 w-fit border-2 border-black px-6 py-1.5 text-center">
+      <div className="credencial-box mx-auto mt-4 w-fit max-w-full border-2 border-black px-6 py-1.5 text-center">
         <p className="text-[11px] font-semibold uppercase tracking-wider">
-          Mesa Nro.
+          {copy.boxLabel}
         </p>
         <p className="font-[family-name:var(--font-data)] text-xl font-bold tabular-nums">
-          {mesa}
+          {boxValue}
         </p>
         {esSuplente ? (
           <p className="text-[10px] font-medium uppercase tracking-wider">
@@ -105,16 +110,16 @@ export function CredencialPersonero({
       <p className="mt-5 text-[12px] leading-relaxed">
         Mediante el presente documento y de conformidad con la normativa vigente
         del Jurado Nacional de Elecciones sobre participación de personeros, se
-        otorga la presente credencial de{" "}
-        <strong>PERSONERO DE MESA DE SUFRAGIO</strong> de la Organización
-        Política: <strong>RENOVACIÓN POPULAR</strong> al Señor (a):
+        otorga la presente credencial de <strong>{copy.otorgamiento}</strong> de
+        la Organización Política: <strong>RENOVACIÓN POPULAR</strong> al Señor
+        (a):
       </p>
 
       <table className="mt-4 w-full border-collapse text-[12px]">
         <tbody>
           <tr>
             <th className="w-[42%] border border-black px-2 py-2 text-left font-semibold">
-              Nombres y Apellidos del Personero
+              {copy.nombreLabel}
             </th>
             <td className="border border-black px-2 py-2 font-medium">
               {nombreCompleto(data) || "—"}
@@ -132,18 +137,20 @@ export function CredencialPersonero({
       </table>
 
       <p className="mt-5 text-center text-[11px] font-bold uppercase tracking-wide">
-        Centro de votación en la que se acredita al personero
+        {copy.lugarTitulo}
       </p>
       <table className="mt-2 w-full border-collapse text-[12px]">
         <tbody>
+          {copy.showLocal ? (
+            <tr>
+              <th className="w-[42%] border border-black px-2 py-2 text-left font-semibold">
+                Nombre del Centro de Votación
+              </th>
+              <td className="border border-black px-2 py-2">{local}</td>
+            </tr>
+          ) : null}
           <tr>
             <th className="w-[42%] border border-black px-2 py-2 text-left font-semibold">
-              Nombre del Centro de Votación
-            </th>
-            <td className="border border-black px-2 py-2">{local}</td>
-          </tr>
-          <tr>
-            <th className="border border-black px-2 py-2 text-left font-semibold">
               Ubicado en la provincia y distrito de:
             </th>
             <td className="border border-black px-2 py-2">
@@ -152,6 +159,35 @@ export function CredencialPersonero({
           </tr>
         </tbody>
       </table>
+
+      {copy.colgarOtraMesa ? (
+        <>
+          <p className="mt-5 text-center text-[11px] font-bold uppercase tracking-wide">
+            Colgar de otra mesa
+          </p>
+          <table className="mt-2 w-full border-collapse text-[12px]">
+            <tbody>
+              <tr>
+                <th className="w-[42%] border border-black px-2 py-2 text-left font-semibold">
+                  Autorización
+                </th>
+                <td className="border border-black px-2 py-2">
+                  {copy.colgarOtraMesa}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-black px-2 py-2 text-left font-semibold">
+                  Mesa en la que se cuelga
+                </th>
+                <td className="border border-black px-2 py-2 font-[family-name:var(--font-data)] tabular-nums">
+                  {data.numero_mesa?.trim() ||
+                    "Cualquier mesa del ámbito acreditado"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      ) : null}
 
       <p className="mt-5 text-[11px] font-bold uppercase tracking-wide">
         Personero legal que otorga la credencial
@@ -186,12 +222,7 @@ export function CredencialPersonero({
       </div>
 
       <footer className="mt-8 border-t border-black pt-3 text-[9px] leading-snug">
-        <p>
-          Esta credencial acredita al titular como personero de mesa de
-          Renovación Popular para las Elecciones Municipales 2026 (domingo 4 de
-          octubre de 2026). El código QR identifica al personero para el
-          registro de asistencia en el local de votación.
-        </p>
+        <p>{copy.footer}</p>
       </footer>
     </article>
   );

@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { loadTeamPersoneros } from "@/lib/coordinacion";
+import { credencialesVisibles } from "@/lib/credencial-visible";
 import { getSessionRegistro } from "@/lib/plataforma";
+import { isAdminRole, isCoordinadorDistrital, labelRol } from "@/lib/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function CoordinacionHomePage() {
   const { registro, plataformaRol } = await getSessionRegistro();
   if (!registro) redirect("/entrar");
 
-  const personeros = await loadTeamPersoneros(registro, plataformaRol);
+  const [personeros, mostrarCredencial] = await Promise.all([
+    loadTeamPersoneros(registro, plataformaRol),
+    credencialesVisibles(),
+  ]);
   const ids = personeros.map((p) => p.id);
   const capacitados = personeros.filter(
     (r) => r.estado === "capacitado" || r.estado === "completado",
@@ -31,16 +36,20 @@ export default async function CoordinacionHomePage() {
 
   return (
     <section className="mx-auto max-w-3xl">
-      <p className="dl-kicker">Coordinación</p>
+      <p className="dl-kicker">
+        {isAdminRole(plataformaRol) ? "Coordinación" : labelRol(plataformaRol)}
+      </p>
       <h1 className="dl-title mt-3 text-3xl">
-        {plataformaRol === "administrador"
+        {isAdminRole(plataformaRol)
           ? "Vista general"
           : registro.distrito && registro.provincia
             ? `${registro.distrito}, ${registro.provincia}`
             : "Tu territorio"}
       </h1>
       <p className="mt-3 text-sm text-muted">
-        Personeros de tu territorio y asignaciones manuales.
+        {isCoordinadorDistrital(plataformaRol)
+          ? "Personeros de tus coordinadores de local y de tu distrito."
+          : "Personeros de tu territorio y asignaciones manuales."}
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -82,6 +91,17 @@ export default async function CoordinacionHomePage() {
         >
           Ver personeros
         </Link>
+        <Link className="dl-btn dl-btn-secondary" href="/coordinacion/actas">
+          Colgar otra mesa
+        </Link>
+        {mostrarCredencial && !isAdminRole(plataformaRol) ? (
+          <Link
+            className="dl-btn dl-btn-secondary"
+            href="/coordinacion/credencial"
+          >
+            Ver credencial
+          </Link>
+        ) : null}
       </div>
     </section>
   );

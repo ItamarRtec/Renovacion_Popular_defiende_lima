@@ -3,6 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { homePathForRole } from "@/lib/auth-paths";
 import { clientIp } from "@/lib/rate-limit";
+import { canLoginWithEmailDni } from "@/lib/roles";
 import { verifyTurnstile } from "@/lib/turnstile";
 
 type RequestBody = { email?: string; clave?: string; turnstileToken?: string };
@@ -114,10 +115,7 @@ export async function POST(request: Request) {
       return rejectSlow(401, { error: "Correo o clave incorrectos." });
     }
 
-    if (
-      reg.plataforma_rol !== "personero" &&
-      reg.plataforma_rol !== "coordinador"
-    ) {
+    if (!canLoginWithEmailDni(reg.plataforma_rol)) {
       await contarFallo();
       return rejectSlow(401, { error: "Correo o clave incorrectos." });
     }

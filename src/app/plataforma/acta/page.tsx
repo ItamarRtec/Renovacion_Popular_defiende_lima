@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
 import { ActaUpload } from "@/components/plataforma/acta-upload";
-import { ACTA_TIPOS, isActaTipo, type ActaTipo } from "@/lib/actas";
+import {
+  ACTA_TIPOS,
+  isActaTipo,
+  normalizeNumeroMesa,
+  type ActaTipo,
+} from "@/lib/actas";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -8,12 +13,17 @@ export default async function PlataformaActaPage() {
   const { registro } = await getSessionRegistro();
   if (!registro) redirect("/plataforma");
 
+  const mesaNorm = normalizeNumeroMesa(registro.numero_mesa);
   const supabase = await createSupabaseServerClient();
-  const { data: rows } = await supabase
+  let query = supabase
     .from("actas")
     .select("id, storage_path, created_at, tipo")
     .eq("registro_id", registro.id)
     .order("created_at", { ascending: false });
+  query = mesaNorm
+    ? query.eq("numero_mesa", mesaNorm)
+    : query.eq("numero_mesa", "");
+  const { data: rows } = await query;
 
   const actas = rows ?? [];
   const latestByTipo = new Map<ActaTipo, (typeof actas)[number]>();
@@ -59,6 +69,7 @@ export default async function PlataformaActaPage() {
         {initial.map(({ tipo, acta }) => (
           <ActaUpload
             key={tipo}
+            numeroMesa={mesaNorm}
             registroId={registro.id}
             tipo={tipo}
             initialActa={acta}

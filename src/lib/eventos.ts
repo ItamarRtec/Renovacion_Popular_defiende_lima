@@ -3,6 +3,10 @@ import type { EventoRow } from "@/lib/supabase/database.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 
+function tablaEventosAusente(error: { code?: string } | null): boolean {
+  return error?.code === "PGRST205" || error?.code === "42P01";
+}
+
 export function eventoEstaAbierto(
   evento: Pick<EventoRow, "activo" | "abre_at" | "cierra_at">,
   now = Date.now(),
@@ -35,7 +39,7 @@ export async function listEventos(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    if (!tablaEventosAusente(error)) console.error(error);
     return [];
   }
 
@@ -53,7 +57,7 @@ export async function getEventoById(
     .maybeSingle();
 
   if (error) {
-    console.error(error);
+    if (!tablaEventosAusente(error)) console.error(error);
     return null;
   }
 
@@ -70,7 +74,7 @@ export async function getEventoActivo(
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    if (!tablaEventosAusente(error)) console.error(error);
     return null;
   }
 
