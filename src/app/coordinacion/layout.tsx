@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
-import { accesoPublicoAbierto } from "@/lib/acceso";
 import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
 
 export default async function CoordinacionLayout({
@@ -20,11 +19,6 @@ export default async function CoordinacionLayout({
     redirect("/plataforma");
   }
 
-  // Fuera de la ventana de acceso, solo administradores entran.
-  if (plataformaRol !== "administrador" && !(await accesoPublicoAbierto())) {
-    redirect("/entrar?cerrado=1");
-  }
-
   const name = registro
     ? `${registro.nombres} ${registro.apellidos}`.trim()
     : null;
@@ -34,6 +28,11 @@ export default async function CoordinacionLayout({
       ? ([
           [
             { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
+            {
+              href: "/coordinacion/escanear",
+              label: "Escanear",
+              icon: "qr" as const,
+            },
             {
               href: "/coordinacion/personeros",
               label: "Personeros",
@@ -45,6 +44,11 @@ export default async function CoordinacionLayout({
       : ([
           [
             { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
+            {
+              href: "/coordinacion/escanear",
+              label: "Escanear",
+              icon: "qr" as const,
+            },
             {
               href: "/coordinacion/personeros",
               label: "Personeros",

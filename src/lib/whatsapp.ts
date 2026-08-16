@@ -15,6 +15,15 @@ export function buildWhatsAppUrl(phoneE164: string, text: string) {
   return `https://wa.me/${phoneE164}?${params.toString()}`;
 }
 
+/** Abre el selector de contacto (invitar amigo, sin número fijo). */
+export function buildWhatsAppShareUrl(text: string) {
+  const params = new URLSearchParams({ text });
+  return `https://wa.me/?${params.toString()}`;
+}
+
+export const LOCAL_VOTACION_NOTA =
+  "Tu local de votación se conocerá la primera semana de septiembre — te llegará por WhatsApp.";
+
 export function mensajePersoneroWhatsApp(opts: {
   nombres: string;
   apellidos: string;
@@ -48,8 +57,19 @@ export function mensajePersoneroWhatsApp(opts: {
       lines.push(`Distrito: ${opts.distrito}.`);
     }
   }
+  lines.push(
+    "El local de votación se confirma la primera semana de septiembre por WhatsApp.",
+  );
   lines.push("Quiero confirmar mi asignación y el video de capacitación.");
   return lines.join(" ");
+}
+
+export function mensajeInvitarAmigoWhatsApp(registerUrl: string) {
+  return [
+    "Oye, únete como personero de Renovación Popular.",
+    "Si eres de Lima, necesito tu apoyo.",
+    `Regístrate aquí: ${registerUrl}`,
+  ].join(" ");
 }
 
 export const REGISTRO_EXITO_STORAGE_KEY = "rp_registro_exito";

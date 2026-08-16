@@ -20,10 +20,12 @@ export function RpAppShell({
   children,
   navGroups,
   name,
+  signOutAction = "/api/auth/sign-out",
 }: {
   children: React.ReactNode;
   navGroups: readonly (readonly SidebarNavItem[])[];
   name?: string | null;
+  signOutAction?: string;
 }) {
   return (
     <>
@@ -65,7 +67,7 @@ export function RpAppShell({
                 {name}
               </p>
             ) : null}
-            <form action="/api/auth/sign-out" method="post">
+            <form action={signOutAction} method="post">
               <button
                 className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-[#404040] transition hover:bg-[#ebebeb]"
                 type="submit"
@@ -79,10 +81,10 @@ export function RpAppShell({
 
         {/* Main column */}
         <div className="flex min-w-0 flex-1 flex-col bg-[#ffffff]">
-          <header className="border-b border-[#e8e8e8] bg-[#ffffff] md:hidden">
-            <div className="flex h-12 items-center justify-between gap-3 px-4">
+          <header className="border-b border-[#e8e8e8] bg-[#ffffff]">
+            <div className="flex h-12 items-center justify-between gap-3 px-4 sm:px-8 lg:px-10">
               <Link
-                className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#171717]"
+                className="inline-flex items-center gap-2 text-[13px] font-semibold text-[#171717] md:hidden"
                 href={rp.homeHref}
               >
                 <Image
@@ -94,16 +96,22 @@ export function RpAppShell({
                 />
                 <span>RP Plataforma</span>
               </Link>
-              <form action="/api/auth/sign-out" method="post">
+              <p className="hidden min-w-0 truncate text-[13px] text-[#707070] md:block">
+                {name ?? "Plataforma"}
+              </p>
+              <form action={signOutAction} method="post">
                 <button
-                  className="rounded-md border border-[#d4d4d4] px-3 py-1.5 text-xs text-[#404040]"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-[#d4d4d4] px-3 py-1.5 text-xs font-medium text-[#404040] transition hover:border-[#1077A1] hover:text-[#1077A1]"
                   type="submit"
                 >
-                  Salir
+                  <SidebarIcon name="logout" className="h-3.5 w-3.5 opacity-70" />
+                  Cerrar sesión
                 </button>
               </form>
             </div>
-            <SidebarNavChips groups={navGroups} />
+            <div className="md:hidden">
+              <SidebarNavChips groups={navGroups} />
+            </div>
           </header>
 
           <main className="flex-1 px-4 py-8 sm:px-8 lg:px-10">{children}</main>

@@ -114,9 +114,65 @@ export type VentanaAccesoUpdate = Partial<
   Pick<VentanaAccesoRow, "abre_at" | "cierra_at" | "activa">
 >;
 
+export type AsistenciaMetodo = "qr" | "manual";
+
+export type AsistenciaRow = {
+  id: string;
+  registro_id: string;
+  coordinador_id: string;
+  llegada_at: string;
+  metodo: AsistenciaMetodo;
+  evento_id: string | null;
+  created_at: string;
+};
+
+export type EventoTipo = "ensayo" | "eleccion";
+
+export type EventoRow = {
+  id: string;
+  nombre: string;
+  tipo: EventoTipo;
+  abre_at: string | null;
+  cierra_at: string | null;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventoInsert = {
+  nombre: string;
+  tipo?: EventoTipo;
+  abre_at?: string | null;
+  cierra_at?: string | null;
+  activo?: boolean;
+};
+
+export type AdministradorRow = {
+  id: string;
+  usuario: string;
+  password_hash: string;
+  nombre: string;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AdministradorInsert = {
+  usuario: string;
+  password_hash: string;
+  nombre?: string;
+  activo?: boolean;
+};
+
 export type Database = {
   public: {
     Tables: {
+      administradores: {
+        Row: AdministradorRow;
+        Insert: AdministradorInsert;
+        Update: Partial<AdministradorInsert>;
+        Relationships: [];
+      };
       registros: {
         Row: RegistroRow;
         Insert: RegistroInsert;
@@ -125,12 +181,28 @@ export type Database = {
       };
       videos: {
         Row: VideoRow;
-        Insert: Omit<VideoRow, "id" | "created_at" | "updated_at"> & {
+        Insert: {
+          titulo: string;
+          url: string;
+          descripcion?: string;
+          orden?: number;
+          duracion_seg?: number | null;
+          activo?: boolean;
           id?: string;
           created_at?: string;
           updated_at?: string;
         };
-        Update: Partial<VideoRow>;
+        Update: Partial<
+          Pick<
+            VideoRow,
+            | "titulo"
+            | "descripcion"
+            | "url"
+            | "orden"
+            | "duracion_seg"
+            | "activo"
+          >
+        >;
         Relationships: [];
       };
       video_progresos: {
@@ -167,6 +239,29 @@ export type Database = {
         Row: DominioAccesoRow;
         Insert: DominioAccesoInsert;
         Update: Partial<DominioAccesoInsert>;
+        Relationships: [];
+      };
+      asistencias: {
+        Row: AsistenciaRow;
+        Insert: {
+          registro_id: string;
+          coordinador_id: string;
+          metodo?: AsistenciaMetodo;
+          llegada_at?: string;
+          evento_id?: string | null;
+        };
+        Update: Partial<
+          Pick<
+            AsistenciaRow,
+            "metodo" | "llegada_at" | "coordinador_id" | "evento_id"
+          >
+        >;
+        Relationships: [];
+      };
+      eventos: {
+        Row: EventoRow;
+        Insert: EventoInsert;
+        Update: Partial<EventoInsert>;
         Relationships: [];
       };
     };
@@ -212,6 +307,14 @@ export type Database = {
       rate_limit_state: {
         Args: { p_clave: string };
         Returns: boolean;
+      };
+      registrar_asistencia: {
+        Args: { p_registro_id: string; p_metodo?: string };
+        Returns: Record<string, unknown>;
+      };
+      evento_activo_id: {
+        Args: Record<string, never>;
+        Returns: string | null;
       };
     };
     Enums: {

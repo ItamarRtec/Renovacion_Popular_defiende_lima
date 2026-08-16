@@ -7,8 +7,9 @@ import { BRANDS } from "@/lib/brands";
 const brand = BRANDS.renovacion_popular;
 
 export const metadata: Metadata = {
-  title: "Sé personero — Renovación Popular",
-  description: "Si eres de Lima necesito tu apoyo. Te necesito en tu mesa.",
+  title: "Sé nuestro personero — Renovación Popular",
+  description:
+    "Elecciones municipales 2027. Domingo 4 de octubre de 2026. Si eres de Lima necesito tu apoyo.",
 };
 
 export default function HomePage() {

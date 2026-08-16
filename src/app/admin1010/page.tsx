@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { PromoteForm } from "@/components/admin/promote-form";
+import { redirect } from "next/navigation";
+import { AdminGateLogin } from "@/components/admin/gate-login";
+import { adminGateConfigured } from "@/lib/admin-gate";
+import { getAdminSession } from "@/lib/admin-session";
 import { BRANDS } from "@/lib/brands";
 
 const rp = BRANDS.renovacion_popular;
 
 export const metadata: Metadata = {
-  title: "Ops",
+  title: "Admin — Entrar",
   robots: { index: false, follow: false },
 };
 
-export default function Admin1010Page() {
+export default async function Admin1010Page() {
+  const session = await getAdminSession();
+  if (session) redirect("/admin");
+
+  const configured = adminGateConfigured();
+
   return (
     <>
       <style>{`
@@ -20,7 +28,7 @@ export default function Admin1010Page() {
       `}</style>
       <div className="theme-rp flex min-h-full flex-1 flex-col bg-white text-[#0b2a36]">
         <header className="dl-nav">
-          <div className="dl-container flex h-[3.25rem] items-center gap-2">
+          <div className="dl-container flex h-[3.25rem] items-center justify-between gap-4">
             <Link
               className="inline-flex items-center gap-2 text-[13px] font-semibold tracking-tight text-[#1077A1]"
               href={rp.homeHref}
@@ -36,19 +44,23 @@ export default function Admin1010Page() {
               />
               <span className="hidden sm:inline">{rp.name}</span>
             </Link>
+            <Link
+              className="text-sm text-muted hover:text-[#1077A1]"
+              href="/entrar"
+            >
+              Entrar
+            </Link>
           </div>
         </header>
 
         <main className="dl-container flex flex-1 flex-col py-16">
-          <div className="mx-auto mb-10 max-w-md text-center">
-            <p className="dl-kicker">Ops</p>
-            <h1 className="dl-title mt-3 text-3xl">Promoción de roles</h1>
-            <p className="mt-3 text-sm text-muted">
-              Asigna coordinador o administrador por DNI. Requiere la clave de
-              servidor.
+          {configured ? (
+            <AdminGateLogin />
+          ) : (
+            <p className="mx-auto max-w-md text-center text-sm text-[#c2410c]">
+              Falta SUPABASE_SERVICE_ROLE_KEY en el servidor.
             </p>
-          </div>
-          <PromoteForm />
+          )}
         </main>
       </div>
     </>

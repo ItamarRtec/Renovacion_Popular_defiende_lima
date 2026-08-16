@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type {
   DominioAccesoRow,
   RegistroOrigen,
@@ -55,23 +54,18 @@ export function AdminDominios({ rows }: { rows: DominioAccesoRow[] }) {
 
     setBusy(true);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: insertError } = await supabase
-        .from("dominios_acceso")
-        .insert({
+      const res = await fetch("/api/admin/dominios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           dominio: normalized,
           origen,
           notas: notas.trim() || null,
-          activo: true,
-        });
-
-      if (insertError) {
-        if (insertError.code === "23505") {
-          setError("Ese dominio ya está registrado.");
-        } else {
-          console.error(insertError);
-          setError("No se pudo guardar el dominio.");
-        }
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo guardar el dominio.");
         return;
       }
 
@@ -91,15 +85,14 @@ export function AdminDominios({ rows }: { rows: DominioAccesoRow[] }) {
     setError(null);
     setBusyId(id);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: updateError } = await supabase
-        .from("dominios_acceso")
-        .update({ activo })
-        .eq("id", id);
-
-      if (updateError) {
-        console.error(updateError);
-        setError("No se pudo actualizar el estado.");
+      const res = await fetch("/api/admin/dominios", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, activo }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo actualizar el estado.");
         return;
       }
       router.refresh();
@@ -115,15 +108,14 @@ export function AdminDominios({ rows }: { rows: DominioAccesoRow[] }) {
     setError(null);
     setBusyId(id);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: updateError } = await supabase
-        .from("dominios_acceso")
-        .update({ origen: next })
-        .eq("id", id);
-
-      if (updateError) {
-        console.error(updateError);
-        setError("No se pudo actualizar la marca.");
+      const res = await fetch("/api/admin/dominios", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, origen: next }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo actualizar la marca.");
         return;
       }
       router.refresh();
@@ -137,25 +129,23 @@ export function AdminDominios({ rows }: { rows: DominioAccesoRow[] }) {
 
   async function remove(id: string, host: string) {
     if (!window.confirm(`¿Eliminar el dominio ${host}?`)) return;
-
     setError(null);
     setBusyId(id);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: deleteError } = await supabase
-        .from("dominios_acceso")
-        .delete()
-        .eq("id", id);
-
-      if (deleteError) {
-        console.error(deleteError);
-        setError("No se pudo eliminar el dominio.");
+      const res = await fetch("/api/admin/dominios", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo eliminar.");
         return;
       }
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("No se pudo eliminar el dominio.");
+      setError("No se pudo eliminar.");
     } finally {
       setBusyId(null);
     }

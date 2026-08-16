@@ -49,15 +49,22 @@ export function Hero({ brand }: HeroProps) {
             className="dl-animate-rise mt-3 max-w-[16ch] text-[clamp(2.75rem,8vw,4.25rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-balance text-[#0b2a36]"
             style={{ animationDelay: "110ms" }}
           >
-            Sé personero.
+            Sé nuestro personero.
           </h1>
 
           <p
             className="dl-animate-rise mt-6 max-w-lg text-[17px] font-normal leading-[1.5] tracking-[-0.022em] text-muted sm:text-[19px]"
             style={{ animationDelay: "150ms" }}
           >
-            Si eres de Lima necesito tu apoyo. Te necesito en{" "}
-            <span className="dl-accent-underline">tu mesa</span>.
+            Si eres de Lima{" "}
+            <span className="dl-accent-underline">necesito tu apoyo</span>.
+          </p>
+
+          <p
+            className="dl-animate-rise mt-3 text-[14px] font-medium tracking-tight text-[#1077A1] sm:text-[15px]"
+            style={{ animationDelay: "170ms" }}
+          >
+            Domingo 4 de octubre de 2026
           </p>
 
           <div

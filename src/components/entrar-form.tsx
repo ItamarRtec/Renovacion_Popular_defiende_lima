@@ -13,9 +13,7 @@ export function EntrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = safeNextPath(searchParams.get("next"));
-  const cerrado = searchParams.get("cerrado") === "1";
-
-  const [mode, setMode] = useState<Mode>(cerrado ? "seguro" : "evento");
+  const [mode, setMode] = useState<Mode>("evento");
   const [dni, setDni] = useState("");
   const [clave, setClave] = useState("");
   const [email, setEmail] = useState("");
@@ -31,11 +29,7 @@ export function EntrarForm() {
     setCaptchaToken(null);
     setCaptchaNonce((n) => n + 1);
   }
-  const [notice, setNotice] = useState<string | null>(
-    cerrado
-      ? "El acceso público está cerrado. Ingreso solo para administradores y coordinadores."
-      : null,
-  );
+  const [notice, setNotice] = useState<string | null>(null);
 
   async function submitEvento() {
     const response = await fetch("/api/auth/event-login", {
@@ -51,19 +45,16 @@ export function EntrarForm() {
       ok?: boolean;
       redirect?: string;
       error?: string;
-      cerrado?: boolean;
       requiereSeguro?: boolean;
     };
 
     if (!response.ok || !payload.ok) {
       // El token de Turnstile es de un solo uso: re-armar el widget.
       resetCaptcha();
-      if (payload.cerrado || payload.requiereSeguro) {
+      if (payload.requiereSeguro) {
         setMode("seguro");
         setNotice(
-          payload.requiereSeguro
-            ? "Tu cuenta usa acceso seguro por enlace. Ingresa tu DNI y correo."
-            : "El acceso público está cerrado. Ingreso solo para administradores y coordinadores.",
+          "Tu cuenta usa acceso seguro por enlace. Ingresa tu DNI y correo.",
         );
         setError(null);
         return;
@@ -160,12 +151,12 @@ export function EntrarForm() {
       onSubmit={handleSubmit}
     >
       <div className="text-center">
-        <p className="dl-kicker">Acceso personeros</p>
+        <p className="dl-kicker">Plataforma</p>
         <h1 className="dl-title mt-3 text-3xl">Entrar</h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">
           {mode === "evento"
-            ? "Usuario: tu correo. Clave: tu DNI."
-            : "Administradores y coordinadores: DNI + correo → enlace seguro."}
+            ? "Personeros y coordinadores: tu correo y tu DNI."
+            : "Administradores: DNI + correo → enlace seguro."}
         </p>
       </div>
 
@@ -286,7 +277,7 @@ export function EntrarForm() {
               setNotice(null);
             }}
           >
-            Soy administrador / coordinador (enlace seguro)
+            Soy administrador (enlace seguro)
           </button>
         ) : (
           <button
@@ -298,7 +289,7 @@ export function EntrarForm() {
               setNotice(null);
             }}
           >
-            Volver al ingreso personero (correo + DNI)
+            Volver al ingreso (correo + DNI)
           </button>
         )}
       </div>

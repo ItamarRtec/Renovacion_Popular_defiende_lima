@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { Suspense } from "react";
 import { RegistroExitoRp } from "@/components/registro-exito-rp";
 import { BRANDS } from "@/lib/brands";
@@ -10,10 +11,19 @@ const brand = BRANDS.renovacion_popular;
 export const metadata: Metadata = {
   title: "Eso es todo amigos — Personero Renovación Popular",
   description:
-    "Ya estás inscrito como personero de Renovación Popular. Escribe por WhatsApp para tu mesa y capacitación.",
+    "Ya estás inscrito como personero. Invita a un amigo y espera tu local por WhatsApp en septiembre.",
 };
 
-export default function RegistroListoPage() {
+async function absoluteRegisterUrl() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}/unirme`;
+}
+
+export default async function RegistroListoPage() {
+  const registerUrl = await absoluteRegisterUrl();
+
   return (
     <>
       <style>{`
@@ -45,7 +55,10 @@ export default function RegistroListoPage() {
         <main className="flex-1">
           <section className="dl-container px-4 pb-20 pt-12 sm:pt-16">
             <Suspense fallback={null}>
-              <RegistroExitoRp homeHref={brand.homeHref} />
+              <RegistroExitoRp
+                homeHref={brand.homeHref}
+                registerUrl={registerUrl}
+              />
             </Suspense>
           </section>
         </main>

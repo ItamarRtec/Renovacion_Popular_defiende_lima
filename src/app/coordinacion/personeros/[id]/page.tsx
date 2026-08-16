@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { getEventoActivo } from "@/lib/eventos";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isPlaceholderVideoUrl, youtubeEmbedUrl } from "@/lib/youtube";
@@ -24,7 +25,16 @@ export default async function CoordinacionPersoneroDetailPage({
 
   if (!personero) notFound();
 
-  const [{ data: videos }, { data: progresos }, { data: acta }] =
+  const evento = await getEventoActivo(supabase);
+  let asisQuery = supabase
+    .from("asistencias")
+    .select("llegada_at, metodo")
+    .eq("registro_id", id);
+  asisQuery = evento
+    ? asisQuery.eq("evento_id", evento.id)
+    : asisQuery.is("evento_id", null);
+
+  const [{ data: videos }, { data: progresos }, { data: acta }, { data: asistencia }] =
     await Promise.all([
       supabase
         .from("videos")
@@ -42,6 +52,7 @@ export default async function CoordinacionPersoneroDetailPage({
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      asisQuery.maybeSingle(),
     ]);
 
   const vistoSet = new Set(
@@ -79,6 +90,23 @@ export default async function CoordinacionPersoneroDetailPage({
         <p className="mt-1 text-sm capitalize text-muted">
           Estado: {personero.estado}
           {personero.coordinador_id ? " · Asignación manual" : ""}
+        </p>
+        <p className="mt-1 text-sm text-muted">
+          Asistencia:{" "}
+          {asistencia ? (
+            <>
+              presente ·{" "}
+              <span className="font-[family-name:var(--font-data)] tabular-nums text-[#1077A1]">
+                {new Intl.DateTimeFormat("es-PE", {
+                  dateStyle: "short",
+                  timeStyle: "medium",
+                }).format(new Date(asistencia.llegada_at))}
+              </span>
+              {asistencia.metodo === "manual" ? " (manual)" : " (QR)"}
+            </>
+          ) : (
+            "aún no llega"
+          )}
         </p>
       </div>
 

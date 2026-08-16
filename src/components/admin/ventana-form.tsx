@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { VentanaAccesoRow } from "@/lib/supabase/database.types";
 
 /** ISO → valor para <input type="datetime-local"> en hora local. */
@@ -43,19 +42,18 @@ export function VentanaForm({
     setSaving(true);
     try {
       const nextActiva = overrides?.activa ?? activa;
-      const supabase = getSupabaseBrowserClient();
-      const { error: updateError } = await supabase
-        .from("ventana_acceso")
-        .update({
+      const res = await fetch("/api/admin/ventana", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           activa: nextActiva,
           abre_at: fromLocalInput(abre),
           cierra_at: fromLocalInput(cierra),
-        })
-        .eq("id", 1);
-
-      if (updateError) {
-        console.error(updateError);
-        setError("No se pudo guardar. Reintenta.");
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo guardar. Reintenta.");
         return;
       }
       if (overrides?.activa !== undefined) setActiva(overrides.activa);

@@ -1,14 +1,44 @@
 import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
-import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
+import { getAdminSession } from "@/lib/admin-session";
 
 const NAV_GROUPS = [
   [
-    { href: "/admin", label: "Panel", icon: "shield" as const },
+    { href: "/admin", label: "Control", icon: "shield" as const },
+    {
+      href: "/admin/videos",
+      label: "Videos",
+      icon: "video" as const,
+    },
+    {
+      href: "/admin/capacitacion",
+      label: "Capacitación",
+      icon: "users" as const,
+    },
+    {
+      href: "/admin/actas",
+      label: "Actas",
+      icon: "image" as const,
+    },
+    {
+      href: "/admin/mesas",
+      label: "Mesas",
+      icon: "chart" as const,
+    },
     {
       href: "/admin/asignaciones",
       label: "Asignaciones",
       icon: "link" as const,
+    },
+    {
+      href: "/admin/roles",
+      label: "Roles",
+      icon: "settings" as const,
+    },
+    {
+      href: "/admin/eventos",
+      label: "Eventos",
+      icon: "qr" as const,
     },
     {
       href: "/admin/ventana",
@@ -21,13 +51,6 @@ const NAV_GROUPS = [
       icon: "settings" as const,
     },
   ],
-  [
-    {
-      href: "/coordinacion",
-      label: "Coordinación",
-      icon: "chart" as const,
-    },
-  ],
 ] as const;
 
 export default async function AdminLayout({
@@ -35,19 +58,15 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { registro, userId, plataformaRol } = await getSessionRegistro();
-
-  if (!userId) redirect("/entrar");
-  if (plataformaRol !== "administrador") {
-    redirect(homePathForRole(plataformaRol));
-  }
-
-  const name = registro
-    ? `${registro.nombres} ${registro.apellidos}`.trim()
-    : null;
+  const session = await getAdminSession();
+  if (!session) redirect("/admin1010");
 
   return (
-    <RpAppShell name={name} navGroups={NAV_GROUPS}>
+    <RpAppShell
+      name={session.nombre || session.usuario}
+      navGroups={NAV_GROUPS}
+      signOutAction="/api/admin/logout"
+    >
       {children}
     </RpAppShell>
   );

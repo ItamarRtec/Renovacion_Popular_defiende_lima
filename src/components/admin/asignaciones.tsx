@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Personero = {
   id: string;
@@ -50,17 +49,17 @@ export function AdminAsignaciones({
     setError(null);
     setBusyId(personeroId);
     try {
-      const supabase = getSupabaseBrowserClient();
-      const { error: updateError } = await supabase
-        .from("registros")
-        .update({
-          coordinador_id: coordinadorId === "" ? null : coordinadorId,
-        })
-        .eq("id", personeroId);
-
-      if (updateError) {
-        console.error(updateError);
-        setError("No se pudo guardar la asignación.");
+      const res = await fetch("/api/admin/asignaciones", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personeroId,
+          coordinadorId: coordinadorId === "" ? null : coordinadorId,
+        }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "No se pudo guardar la asignación.");
         return;
       }
       router.refresh();

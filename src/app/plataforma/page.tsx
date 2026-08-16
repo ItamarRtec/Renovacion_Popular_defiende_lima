@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -22,7 +23,7 @@ export default async function PlataformaHomePage() {
   }
 
   const supabase = await createSupabaseServerClient();
-  const [{ data: videos }, { data: progresos }, { data: actas }] =
+  const [{ data: videos }, { data: progresos }, { data: actas }, qrDataUrl] =
     await Promise.all([
       supabase
         .from("videos")
@@ -38,6 +39,7 @@ export default async function PlataformaHomePage() {
         .select("id")
         .eq("registro_id", registro.id)
         .limit(1),
+      renderPersoneroQrDataUrl(registro.id),
     ]);
 
   const totalVideos = videos?.length ?? 0;
@@ -49,9 +51,38 @@ export default async function PlataformaHomePage() {
       <p className="dl-kicker">Hola, {registro.nombres}</p>
       <h1 className="dl-title mt-3 text-3xl sm:text-4xl">Tu plataforma</h1>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-        Completa la capacitación en video y, el día de la elección, sube la
-        foto del acta desde aquí.
+        Desde aquí haces todo: capacitarte, ver tu mesa y, el día del evento,
+        mostrar el QR y subir el acta. Nosotros vemos el avance en el tablero.
       </p>
+
+      {qrDataUrl ? (
+        <div className="dl-panel mx-auto mt-10 max-w-sm px-5 py-6 text-center">
+          <p className="text-xs uppercase tracking-wider text-muted">
+            Tu QR único
+          </p>
+          {/* QR is a data URL from the server — not a remote asset. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={qrDataUrl}
+            alt={`QR de ${registro.nombres}`}
+            className="mx-auto mt-4 h-[220px] w-[220px]"
+            width={220}
+            height={220}
+          />
+          <p className="mt-4 text-sm font-medium text-[#0b2a36]">
+            {registro.nombres} {registro.apellidos}
+          </p>
+          <p className="mt-1 font-[family-name:var(--font-data)] tabular-nums text-[#1077A1]">
+            Mesa {registro.numero_mesa?.trim() || "—"}
+          </p>
+          <Link
+            className="mt-4 inline-block text-sm text-[#1077A1] underline underline-offset-2"
+            href="/plataforma/qr"
+          >
+            Ver en grande
+          </Link>
+        </div>
+      ) : null}
 
       <div className="mt-10 space-y-4">
         <Link

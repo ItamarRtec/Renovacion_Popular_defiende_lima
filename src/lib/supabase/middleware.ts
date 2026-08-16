@@ -1,8 +1,53 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  isAdminHostAllowed,
+  isAdminSurfacePath,
+} from "@/lib/admin-access";
+import {
+  ADMIN_SESSION_COOKIE,
+  parseAdminSessionToken,
+} from "@/lib/admin-session";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
+
+  const path = request.nextUrl.pathname;
+  const adminAllowed = isAdminHostAllowed(request);
+
+  // Admin + ops: only localhost (or ALLOW_ADMIN=1). Public deploy → 404.
+  if (isAdminSurfacePath(path) && !adminAllowed) {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  const isAdminPanel =
+    (path === "/admin" || path.startsWith("/admin/")) &&
+    path !== "/admin1010" &&
+    !path.startsWith("/admin1010/");
+  const isAdminLogin = path === "/admin1010" || path.startsWith("/admin1010/");
+  const isAdminApi =
+    (path === "/api/admin" || path.startsWith("/api/admin/")) &&
+    path !== "/api/admin/logout";
+  const adminSession = parseAdminSessionToken(
+    request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
+  );
+
+  if ((isAdminPanel || isAdminApi) && !adminSession) {
+    if (isAdminApi) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/admin1010";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (isAdminLogin && adminSession) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/admin";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -32,17 +77,12 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
   const isPlataforma =
     path === "/plataforma" || path.startsWith("/plataforma/");
   const isCoordinacion =
     path === "/coordinacion" || path.startsWith("/coordinacion/");
-  // /admin1010 es ops secreto (clave env), no exige sesión de plataforma.
-  const isAdmin =
-    (path === "/admin" || path.startsWith("/admin/")) &&
-    path !== "/admin1010" &&
-    !path.startsWith("/admin1010/");
-  const needsAuth = isPlataforma || isCoordinacion || isAdmin;
+  // /admin usa cookie propia (administradores), no sesión Supabase de registros.
+  const needsAuth = isPlataforma || isCoordinacion;
 
   if (needsAuth && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -60,22 +100,12 @@ export async function updateSession(request: NextRequest) {
 
     const rol = registro?.plataforma_rol ?? "personero";
 
-    // Con el acceso cerrado, un no-admin debe poder ver /entrar (mensaje de
-    // cerrado) sin que lo reboten a su home (que a su vez lo devolvería aquí).
-    if (rol !== "administrador") {
-      const { data: abierto } = await supabase.rpc("acceso_publico_abierto");
-      if (abierto === false) {
-        return supabaseResponse;
-      }
-    }
-
     const redirectUrl = request.nextUrl.clone();
+    // Administradores de registros ya no usan /admin (panel propio en /admin1010).
     redirectUrl.pathname =
-      rol === "administrador"
-        ? "/admin"
-        : rol === "coordinador"
-          ? "/coordinacion"
-          : "/plataforma";
+      rol === "administrador" || rol === "coordinador"
+        ? "/coordinacion"
+        : "/plataforma";
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

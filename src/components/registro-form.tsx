@@ -218,8 +218,8 @@ export function RegistroForm({
         <h2 className="dl-title mt-3 text-2xl">Gracias por unirte</h2>
         {esSuplente ? (
           <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-            Su mesa ya tiene personero titular. Quedó en la{" "}
-            <strong>lista de suplentes</strong>. Lo contactaremos con una nueva
+            Tu mesa ya tiene personero titular. Quedaste en la{" "}
+            <strong>lista de suplentes</strong>. Te contactaremos con una nueva
             mesa en el mismo centro de votación
             {submittedMesa?.centro_votacion
               ? ` (${submittedMesa.centro_votacion})`
@@ -228,7 +228,7 @@ export function RegistroForm({
           </p>
         ) : mesa ? (
           <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-            Usted es personero de la mesa{" "}
+            Eres personero de la mesa{" "}
             <strong className="font-[family-name:var(--font-data)] text-[#1077A1]">
               {mesa}
             </strong>
@@ -245,7 +245,8 @@ export function RegistroForm({
           </p>
         ) : (
           <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">
-            Su mesa será asignada en breve. Recibirá un mensaje con ella.
+            Tu mesa será asignada por ONPE. En cuanto lo sea nos contactaremos
+            contigo.
           </p>
         )}
         <p className="mx-auto mt-3 text-sm leading-relaxed text-muted">

@@ -1,8 +1,8 @@
 import { AdminAsignaciones } from "@/components/admin/asignaciones";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireAdminDb } from "@/lib/admin-session";
 
 export default async function AdminAsignacionesPage() {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireAdminDb();
 
   const [{ data: personeros }, { data: coordinadores }] = await Promise.all([
     supabase

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -5,6 +6,12 @@ import { EntrarForm } from "@/components/entrar-form";
 import { BRANDS } from "@/lib/brands";
 
 const rp = BRANDS.renovacion_popular;
+
+export const metadata: Metadata = {
+  title: "Entrar — Renovación Popular",
+  description:
+    "Ingreso de personeros y coordinadores. Correo + DNI.",
+};
 
 export default function EntrarPage() {
   return (

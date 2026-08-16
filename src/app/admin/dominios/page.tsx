@@ -1,8 +1,8 @@
 import { AdminDominios } from "@/components/admin/dominios";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireAdminDb } from "@/lib/admin-session";
 
 export default async function AdminDominiosPage() {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireAdminDb();
   const { data } = await supabase
     .from("dominios_acceso")
     .select("id, dominio, origen, activo, notas, created_at, updated_at")

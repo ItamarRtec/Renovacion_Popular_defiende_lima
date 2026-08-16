@@ -22,15 +22,14 @@ async function rejectSlow(status: number, body: Record<string, unknown>) {
 }
 
 /**
- * Acceso del día del evento para PERSONEROS: correo (usuario) + clave (= DNI).
+ * Acceso de personeros y coordinadores: correo (usuario) + clave (= DNI).
  *
- * Defensa (rediseñada tras la re-auditoría):
- *  - CAPTCHA (Turnstile) como control primario anti-automatización/bloqueo dirigido.
- *  - Ventana de acceso.
- *  - Throttle por IP CONFIABLE (Vercel) contando SOLO fallos reales → sin auto-DoS
- *    por CGNAT y sin lockout dirigido por correo (se eliminó el bloqueo por correo).
+ * Defensa:
+ *  - CAPTCHA (Turnstile) como control primario anti-automatización.
+ *  - Personeros y coordinadores entran siempre. El evento solo acota el QR.
+ *  - Throttle por IP CONFIABLE (Vercel) contando SOLO fallos reales.
  *  - Mensaje genérico + retraso ante fallo (no revela si el correo existe).
- *  - Solo rol personero; staff → OTP. La clave nunca se guarda en Auth.
+ *  - Administradores de registros siguen por OTP. La clave nunca se guarda en Auth.
  */
 export async function POST(request: Request) {
   let body: RequestBody;
@@ -74,21 +73,7 @@ export async function POST(request: Request) {
     );
   }
 
-  // 2) Ventana de acceso (fail-open a nivel login; la RLS bloquea escrituras
-  //    tras el cierre igualmente).
-  const { data: abierto } = await admin.rpc("acceso_publico_abierto");
-  if (abierto === false) {
-    return NextResponse.json(
-      {
-        error:
-          "El acceso público está cerrado. Si eres administrador o coordinador, usa el acceso seguro.",
-        cerrado: true,
-      },
-      { status: 403 },
-    );
-  }
-
-  // 3) ¿La IP está en enfriamiento por fallos previos? (consulta sin incrementar)
+  // 2) ¿La IP está en enfriamiento por fallos previos? (consulta sin incrementar)
   const { data: bloqueada } = await admin.rpc("rate_limit_state", {
     p_clave: `ip:${ip}`,
   });
@@ -129,8 +114,10 @@ export async function POST(request: Request) {
       return rejectSlow(401, { error: "Correo o clave incorrectos." });
     }
 
-    // Staff no entra por aquí (no cuenta como fallo de fuerza bruta).
-    if (reg.plataforma_rol !== "personero") {
+    if (
+      reg.plataforma_rol !== "personero" &&
+      reg.plataforma_rol !== "coordinador"
+    ) {
       return NextResponse.json(
         {
           error:

@@ -6,8 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Chevron } from "@/components/icons/chevron";
 import {
+  buildWhatsAppShareUrl,
   buildWhatsAppUrl,
   clearRegistroExitoDraft,
+  LOCAL_VOTACION_NOTA,
+  mensajeInvitarAmigoWhatsApp,
   mensajePersoneroWhatsApp,
   readRegistroExitoDraft,
   whatsappAsignacionE164,
@@ -16,6 +19,8 @@ import {
 
 type RegistroExitoRpProps = {
   homeHref: string;
+  /** Absolute /unirme URL for WhatsApp invite (from server host). */
+  registerUrl: string;
 };
 
 function draftFromSearchParams(
@@ -61,7 +66,10 @@ function mergeDraft(
   };
 }
 
-export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
+export function RegistroExitoRp({
+  homeHref,
+  registerUrl,
+}: RegistroExitoRpProps) {
   const searchParams = useSearchParams();
   const [draft] = useState<RegistroExitoDraft | null>(() =>
     mergeDraft(readRegistroExitoDraft(), draftFromSearchParams(searchParams)),
@@ -76,6 +84,10 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
         : "Hola Rafael, me registré como personero de Renovación Popular. Quiero confirmar mi asignación y el video de capacitación.";
     return buildWhatsAppUrl(phone, text);
   }, [draft, phone]);
+
+  const inviteHref = buildWhatsAppShareUrl(
+    mensajeInvitarAmigoWhatsApp(registerUrl),
+  );
 
   const esSuplente = draft?.rol_mesa === "suplente";
   const tieneMesaTitular = Boolean(draft?.numero_mesa) && !esSuplente;
@@ -122,11 +134,14 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
           </div>
           <div className="px-5 pb-5 pt-1 text-left">
             <p className="text-sm leading-relaxed text-muted">
-              Su mesa ONPE ya tiene personero titular. Quedó en la{" "}
-              <strong className="text-white">lista de suplentes</strong>. Lo
+              Tu mesa ONPE ya tiene personero titular. Quedaste en la{" "}
+              <strong className="text-white">lista de suplentes</strong>. Te
               contactaremos con una nueva mesa en el{" "}
               <strong className="text-white">mismo centro de votación</strong>{" "}
-              donde usted vota.
+              donde votas.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              {LOCAL_VOTACION_NOTA}
             </p>
           </div>
           <dl className="rp-mesa-card__rows">
@@ -166,11 +181,14 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       ) : tieneMesaTitular ? (
         <div className="rp-mesa-card mx-auto mt-6">
           <div className="rp-mesa-card__head">
-            <p className="dl-kicker">Su mesa</p>
+            <p className="dl-kicker">Tu mesa</p>
           </div>
           <div className="rp-mesa-card__mesa">
             <p className="rp-mesa-card__number">{draft!.numero_mesa}</p>
           </div>
+          <p className="border-b border-[rgb(16_119_161_/_0.12)] px-5 py-3 text-left text-sm leading-relaxed text-muted">
+            {LOCAL_VOTACION_NOTA}
+          </p>
           <dl className="rp-mesa-card__rows">
             {draft?.distrito ? (
               <div className="rp-mesa-card__row">
@@ -201,7 +219,11 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
         <div className="dl-panel mx-auto mt-6 px-5 py-5 text-left">
           <p className="dl-kicker">Asignación pendiente</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Su mesa será asignada en breve. Recibirá un mensaje con ella.
+            Tu mesa será asignada por ONPE. En cuanto lo sea nos contactaremos
+            contigo.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            {LOCAL_VOTACION_NOTA}
           </p>
         </div>
       )}
@@ -211,13 +233,15 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
       </p>
 
       <div className="mt-10 flex flex-col items-stretch gap-3">
-        <Link
+        <a
           className="dl-btn dl-btn-primary w-full"
-          href={homeHref}
-          onClick={() => clearRegistroExitoDraft()}
+          href={inviteHref}
+          rel="noopener noreferrer"
+          target="_blank"
         >
-          Volver al inicio
-        </Link>
+          Invita a un amigo por WhatsApp
+          <Chevron />
+        </a>
         {waHref ? (
           <a
             className="dl-btn dl-btn-secondary w-full"
@@ -229,6 +253,13 @@ export function RegistroExitoRp({ homeHref }: RegistroExitoRpProps) {
             <Chevron />
           </a>
         ) : null}
+        <Link
+          className="dl-btn dl-btn-secondary w-full"
+          href={homeHref}
+          onClick={() => clearRegistroExitoDraft()}
+        >
+          Volver al inicio
+        </Link>
       </div>
     </div>
   );

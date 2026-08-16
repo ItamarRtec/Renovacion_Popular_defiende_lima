@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { RpAppShell } from "@/components/rp-app-shell";
-import { accesoPublicoAbierto } from "@/lib/acceso";
 import { getSessionRegistro, homePathForRole } from "@/lib/plataforma";
 
 const NAV_GROUPS = [
   [
     { href: "/plataforma", label: "Inicio", icon: "home" as const },
     { href: "/plataforma/videos", label: "Videos", icon: "video" as const },
+    { href: "/plataforma/qr", label: "Mi QR", icon: "qr" as const },
     { href: "/plataforma/acta", label: "Acta", icon: "image" as const },
   ],
 ] as const;
@@ -24,11 +24,6 @@ export default async function PlataformaLayout({
 
   if (plataformaRol === "coordinador" || plataformaRol === "administrador") {
     redirect(homePathForRole(plataformaRol));
-  }
-
-  // Fuera de la ventana de acceso, la plataforma queda cerrada para no-admins.
-  if (!(await accesoPublicoAbierto())) {
-    redirect("/entrar?cerrado=1");
   }
 
   const name = registro

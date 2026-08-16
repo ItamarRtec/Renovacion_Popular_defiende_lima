@@ -1,8 +1,8 @@
 import { VentanaForm } from "@/components/admin/ventana-form";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireAdminDb } from "@/lib/admin-session";
 
 export default async function AdminVentanaPage() {
-  const supabase = await createSupabaseServerClient();
+  const { supabase } = await requireAdminDb();
   const { data } = await supabase
     .from("ventana_acceso")
     .select("id, abre_at, cierra_at, activa, updated_at")
@@ -16,9 +16,12 @@ export default async function AdminVentanaPage() {
       <p className="dl-kicker">Administración</p>
       <h1 className="dl-title mt-3 text-3xl">Ventana de acceso</h1>
       <p className="mt-3 max-w-xl text-sm text-muted">
-        Controla cuándo los personeros pueden entrar con correo + DNI. Fuera de
-        la ventana, el acceso público se cierra; administradores y coordinadores
-        entran por enlace seguro (OTP).
+        Personeros y coordinadores entran siempre con correo + DNI. Esta
+        ventana ya no cierra el login. Para un ensayo de QR, usa{" "}
+        <a className="underline underline-offset-2" href="/admin/eventos">
+          Eventos
+        </a>
+        : aísla las llegadas del día D.
       </p>
       <div className="mt-8">
         <VentanaForm

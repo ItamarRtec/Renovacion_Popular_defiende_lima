@@ -33,8 +33,8 @@ export const BRANDS: Record<BrandId, BrandConfig> = {
     logoAlt: "Renovación Popular",
     heroTitle: "Renovación Popular",
     heroHighlight: "",
-    heroLede: "Si eres de Lima necesito tu apoyo. Te necesito en tu mesa.",
-    announce: "Elecciones · sé personero",
+    heroLede: "Si eres de Lima necesito tu apoyo.",
+    announce: "Elecciones municipales 2027 · sé nuestro personero",
     themeClass: "theme-rp",
   },
   /** Registro interno / legado (no es el hero público). */

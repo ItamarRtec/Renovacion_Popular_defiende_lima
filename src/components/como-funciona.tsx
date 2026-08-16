@@ -9,11 +9,13 @@ const STEPS = [
   },
   {
     title: "Recibe tu mesa",
-    description: "Te asignamos tu local — o el más cerca de casa.",
+    description:
+      "Tu local se confirma la 1.ª semana de septiembre por WhatsApp.",
   },
   {
     title: "Defiende tu mesa",
-    description: "Un solo día: cuidas el voto y mandas el acta.",
+    description:
+      "Domingo 4 de octubre de 2026: cuidas el voto y mandas el acta.",
   },
   {
     title: "Cobra por Yape o Plin",

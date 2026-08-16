@@ -102,6 +102,20 @@ export function IconLogout(props: IconProps) {
   );
 }
 
+export function IconQr(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d="M4 4h6v6H4V4Z" />
+      <path d="M14 4h6v6h-6V4Z" />
+      <path d="M4 14h6v6H4v-6Z" />
+      <path d="M14 14h2v2h-2v-2Z" />
+      <path d="M18 14h2v2h-2v-2Z" />
+      <path d="M14 18h2v2h-2v-2Z" />
+      <path d="M18 18h2v2h-2v-2Z" />
+    </svg>
+  );
+}
+
 export type SidebarIconName =
   | "home"
   | "video"
@@ -111,7 +125,8 @@ export type SidebarIconName =
   | "shield"
   | "link"
   | "settings"
-  | "logout";
+  | "logout"
+  | "qr";
 
 const MAP = {
   home: IconHome,
@@ -123,6 +138,7 @@ const MAP = {
   link: IconLink,
   settings: IconSettings,
   logout: IconLogout,
+  qr: IconQr,
 } as const;
 
 export function SidebarIcon({
