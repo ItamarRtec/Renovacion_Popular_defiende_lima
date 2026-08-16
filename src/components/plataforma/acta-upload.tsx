@@ -61,26 +61,29 @@ export function ActaUpload({
         return;
       }
 
-      if (acta?.storage_path) {
-        await supabase.storage.from("actas").remove([acta.storage_path]);
-        await supabase.from("actas").delete().eq("id", acta.id);
-      }
-
       const { data: inserted, error: insertError } = await supabase
         .from("actas")
-        .insert({
-          registro_id: registroId,
-          storage_path: path,
-          origen: "web",
-          tipo,
-        })
+        .upsert(
+          {
+            registro_id: registroId,
+            storage_path: path,
+            origen: "web",
+            tipo,
+          },
+          { onConflict: "registro_id,tipo" },
+        )
         .select("id, storage_path, created_at")
         .single();
 
       if (insertError || !inserted) {
         console.error(insertError);
-        setError("La foto se subió pero no se registró. Intenta de nuevo.");
+        await supabase.storage.from("actas").remove([path]);
+        setError("No pudimos registrar la foto. Intenta de nuevo.");
         return;
+      }
+
+      if (acta?.storage_path && acta.storage_path !== path) {
+        await supabase.storage.from("actas").remove([acta.storage_path]);
       }
 
       const { data: signed } = await supabase.storage
