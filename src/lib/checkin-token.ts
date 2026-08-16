@@ -2,9 +2,13 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 const DEFAULT_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 días
 
+/** Firma de respaldo si Vercel aún no tiene CHECKIN_QR_SECRET. */
+const FALLBACK_QR_SECRET = "rp-personero-qr-v1-defiende-lima-2026xx";
+
 function secret(): string | null {
   const s = process.env.CHECKIN_QR_SECRET?.trim();
-  return s && s.length >= 16 ? s : null;
+  if (s && s.length >= 16) return s;
+  return FALLBACK_QR_SECRET;
 }
 
 export function checkInQrConfigured(): boolean {
