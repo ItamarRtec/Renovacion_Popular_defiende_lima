@@ -15,6 +15,8 @@ export type RolMesa = "titular" | "suplente";
 
 export type ActaOrigen = "web" | "whatsapp";
 
+export type ActaTipo = "instalacion_sufragio" | "escrutinio";
+
 export type RegistroInsert = {
   rol: ParticipacionRol;
   nombres: string;
@@ -81,6 +83,7 @@ export type ActaRow = {
   registro_id: string;
   storage_path: string;
   origen: ActaOrigen;
+  tipo: ActaTipo;
   created_at: string;
   updated_at: string;
 };
@@ -225,8 +228,9 @@ export type Database = {
           registro_id: string;
           storage_path: string;
           origen?: ActaOrigen;
+          tipo?: ActaTipo;
         };
-        Update: Partial<Pick<ActaRow, "storage_path" | "origen">>;
+        Update: Partial<Pick<ActaRow, "storage_path" | "origen" | "tipo">>;
         Relationships: [];
       };
       ventana_acceso: {
@@ -309,7 +313,11 @@ export type Database = {
         Returns: boolean;
       };
       registrar_asistencia: {
-        Args: { p_registro_id: string; p_metodo?: string };
+        Args: {
+          p_registro_id: string;
+          p_metodo?: string;
+          p_evento_id?: string;
+        };
         Returns: Record<string, unknown>;
       };
       evento_activo_id: {

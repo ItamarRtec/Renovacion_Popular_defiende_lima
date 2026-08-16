@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-const DEFAULT_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 días
+const DEFAULT_TTL_MS = 1000 * 60 * 60 * 24 * 180; // 180 días (cubre el 4 oct 2026)
 
 /** Firma de respaldo si Vercel aún no tiene CHECKIN_QR_SECRET. */
 const FALLBACK_QR_SECRET = "rp-personero-qr-v1-defiende-lima-2026xx";

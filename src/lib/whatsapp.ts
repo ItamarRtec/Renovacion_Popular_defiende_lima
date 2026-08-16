@@ -79,8 +79,11 @@ export type RegistroExitoDraft = {
   apellidos: string;
   dni: string;
   telefono: string;
+  id?: string | null;
+  qrToken?: string | null;
   numero_mesa?: string | null;
   centro_votacion?: string | null;
+  provincia?: string | null;
   distrito?: string | null;
   rol_mesa?: "titular" | "suplente" | null;
 };

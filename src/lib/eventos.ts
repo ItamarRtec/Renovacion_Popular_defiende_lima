@@ -25,6 +25,41 @@ export function pickEventoActivo(eventos: EventoRow[]): EventoRow | null {
   return ranked[0] ?? null;
 }
 
+export async function listEventos(
+  supabase: AdminDb | SupabaseClient<Database>,
+): Promise<EventoRow[]> {
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("*")
+    .eq("activo", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return (data ?? []) as EventoRow[];
+}
+
+export async function getEventoById(
+  supabase: AdminDb | SupabaseClient<Database>,
+  id: string,
+): Promise<EventoRow | null> {
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return (data as EventoRow | null) ?? null;
+}
+
 export async function getEventoActivo(
   supabase: AdminDb | SupabaseClient<Database>,
 ): Promise<EventoRow | null> {

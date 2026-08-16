@@ -6,6 +6,7 @@ import {
 
 export async function renderPersoneroQrDataUrl(
   registroId: string,
+  options?: { dark?: string },
 ): Promise<string | null> {
   if (!checkInQrConfigured()) return null;
   const token = signCheckInToken(registroId);
@@ -13,6 +14,6 @@ export async function renderPersoneroQrDataUrl(
     errorCorrectionLevel: "M",
     margin: 2,
     width: 280,
-    color: { dark: "#0b2a36", light: "#ffffff" },
+    color: { dark: options?.dark ?? "#0b2a36", light: "#ffffff" },
   });
 }

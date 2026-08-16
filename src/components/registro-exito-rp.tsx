@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { CredencialAcciones } from "@/components/credencial-acciones";
 import { Chevron } from "@/components/icons/chevron";
 import {
   buildWhatsAppShareUrl,
@@ -52,6 +53,7 @@ function mergeDraft(
       telefono: "",
       numero_mesa: fromUrl?.numero_mesa ?? null,
       centro_votacion: fromUrl?.centro_votacion ?? null,
+      provincia: fromUrl?.provincia ?? null,
       distrito: fromUrl?.distrito ?? null,
       rol_mesa: fromUrl?.rol_mesa ?? null,
     };
@@ -61,6 +63,7 @@ function mergeDraft(
     numero_mesa: stored.numero_mesa || fromUrl?.numero_mesa || null,
     centro_votacion:
       stored.centro_votacion || fromUrl?.centro_votacion || null,
+    provincia: stored.provincia || fromUrl?.provincia || null,
     distrito: stored.distrito || fromUrl?.distrito || null,
     rol_mesa: stored.rol_mesa || fromUrl?.rol_mesa || null,
   };
@@ -92,10 +95,11 @@ export function RegistroExitoRp({
   const esSuplente = draft?.rol_mesa === "suplente";
   const tieneMesaTitular = Boolean(draft?.numero_mesa) && !esSuplente;
   const tieneNombre = Boolean(draft?.nombres);
+  const puedeCredencial = Boolean(draft?.nombres && draft?.dni);
 
   return (
-    <div className="mx-auto max-w-md text-center">
-      <div className="mx-auto mb-2 flex flex-col items-center">
+    <div className="mx-auto max-w-3xl text-center">
+      <div className="no-print mx-auto mb-2 flex max-w-md flex-col items-center">
         <h1
           className="rp-porki-bubble mb-3"
           aria-label="Rafael dice: Eso es todo amigos."
@@ -113,8 +117,8 @@ export function RegistroExitoRp({
           />
         </div>
       </div>
-      <p className="dl-kicker mt-4">Inscripción completa</p>
-      <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
+      <p className="dl-kicker no-print mt-4">Inscripción completa</p>
+      <p className="no-print mx-auto mt-4 max-w-md text-base leading-relaxed text-muted">
         {tieneNombre ? (
           <>
             Gracias, <strong>{draft!.nombres}</strong>. Ya eres personero de{" "}
@@ -128,7 +132,7 @@ export function RegistroExitoRp({
       </p>
 
       {esSuplente ? (
-        <div className="rp-mesa-card mx-auto mt-6">
+        <div className="rp-mesa-card no-print mx-auto mt-6 max-w-md">
           <div className="rp-mesa-card__head">
             <p className="dl-kicker">Lista de suplentes</p>
           </div>
@@ -179,7 +183,7 @@ export function RegistroExitoRp({
           </dl>
         </div>
       ) : tieneMesaTitular ? (
-        <div className="rp-mesa-card mx-auto mt-6">
+        <div className="rp-mesa-card no-print mx-auto mt-6 max-w-md">
           <div className="rp-mesa-card__head">
             <p className="dl-kicker">Tu mesa</p>
           </div>
@@ -216,7 +220,7 @@ export function RegistroExitoRp({
           </dl>
         </div>
       ) : (
-        <div className="dl-panel mx-auto mt-6 px-5 py-5 text-left">
+        <div className="dl-panel no-print mx-auto mt-6 max-w-md px-5 py-5 text-left">
           <p className="dl-kicker">Asignación pendiente</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Tu mesa será asignada por ONPE. En cuanto lo sea nos contactaremos
@@ -228,11 +232,37 @@ export function RegistroExitoRp({
         </div>
       )}
 
-      <p className="mx-auto mt-6 text-sm leading-relaxed text-muted">
+      <p className="no-print mx-auto mt-6 max-w-md text-sm leading-relaxed text-muted">
         Pronto nos contactaremos contigo.
       </p>
 
-      <div className="mt-10 flex flex-col items-stretch gap-3">
+      {puedeCredencial ? (
+        <div className="mt-10 text-left">
+          <p className="no-print dl-kicker text-center">Tu credencial</p>
+          <p className="no-print mx-auto mt-2 max-w-md text-center text-sm leading-relaxed text-muted">
+            Descárgala ahora. El QR es el mismo que usarán los coordinadores
+            para registrar tu asistencia. Si cierras esta página, vuelve a
+            bajarla desde tu plataforma.
+          </p>
+          <div className="mt-6">
+            <CredencialAcciones
+              data={{
+                nombres: draft!.nombres,
+                apellidos: draft!.apellidos,
+                dni: draft!.dni,
+                numero_mesa: draft!.numero_mesa,
+                centro_votacion: draft!.centro_votacion,
+                provincia: draft!.provincia,
+                distrito: draft!.distrito,
+                rol_mesa: draft!.rol_mesa,
+              }}
+              qrToken={draft!.qrToken}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="no-print mx-auto mt-10 flex max-w-md flex-col items-stretch gap-3">
         <a
           className="dl-btn dl-btn-primary w-full"
           href={inviteHref}

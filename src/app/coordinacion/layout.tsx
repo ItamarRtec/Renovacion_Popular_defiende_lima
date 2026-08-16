@@ -29,8 +29,8 @@ export default async function CoordinacionLayout({
           [
             { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
             {
-              href: "/coordinacion/escanear",
-              label: "Escanear",
+              href: "/coordinacion/eventos",
+              label: "Registrar evento",
               icon: "qr" as const,
             },
             {
@@ -45,8 +45,8 @@ export default async function CoordinacionLayout({
           [
             { href: "/coordinacion", label: "Resumen", icon: "chart" as const },
             {
-              href: "/coordinacion/escanear",
-              label: "Escanear",
+              href: "/coordinacion/eventos",
+              label: "Registrar evento",
               icon: "qr" as const,
             },
             {

@@ -29,6 +29,8 @@ export type ActaReportRow = {
   dni: string;
   numero_mesa: string | null;
   distrito: string | null;
+  hasInstalacion: boolean;
+  hasEscrutinio: boolean;
   hasActa: boolean;
   actaAt: string | null;
 };
@@ -37,8 +39,10 @@ export type ActaReport = {
   totalPersoneros: number;
   conActa: number;
   sinActa: number;
+  incompletas: number;
   rowsConActa: ActaReportRow[];
   rowsSinActa: ActaReportRow[];
+  rowsIncompletas: ActaReportRow[];
 };
 
 export async function getCapacitacionReport(
@@ -111,21 +115,29 @@ export async function getActaReport(supabase: AdminDb): Promise<ActaReport> {
       .order("apellidos", { ascending: true }),
     supabase
       .from("actas")
-      .select("registro_id, created_at")
+      .select("registro_id, created_at, tipo")
       .order("created_at", { ascending: false }),
   ]);
 
   const latestActa = new Map<string, string>();
+  const tiposByRegistro = new Map<string, Set<string>>();
   for (const a of actas ?? []) {
     if (!latestActa.has(a.registro_id)) {
       latestActa.set(a.registro_id, a.created_at);
     }
+    const set = tiposByRegistro.get(a.registro_id) ?? new Set<string>();
+    set.add(a.tipo);
+    tiposByRegistro.set(a.registro_id, set);
   }
 
   const rowsConActa: ActaReportRow[] = [];
   const rowsSinActa: ActaReportRow[] = [];
+  const rowsIncompletas: ActaReportRow[] = [];
 
   for (const p of personeros ?? []) {
+    const tipos = tiposByRegistro.get(p.id) ?? new Set<string>();
+    const hasInstalacion = tipos.has("instalacion_sufragio");
+    const hasEscrutinio = tipos.has("escrutinio");
     const actaAt = latestActa.get(p.id) ?? null;
     const row: ActaReportRow = {
       id: p.id,
@@ -134,10 +146,13 @@ export async function getActaReport(supabase: AdminDb): Promise<ActaReport> {
       dni: p.dni,
       numero_mesa: p.numero_mesa ?? null,
       distrito: p.distrito ?? null,
-      hasActa: Boolean(actaAt),
+      hasInstalacion,
+      hasEscrutinio,
+      hasActa: hasInstalacion && hasEscrutinio,
       actaAt,
     };
     if (row.hasActa) rowsConActa.push(row);
+    else if (hasInstalacion || hasEscrutinio) rowsIncompletas.push(row);
     else rowsSinActa.push(row);
   }
 
@@ -145,7 +160,9 @@ export async function getActaReport(supabase: AdminDb): Promise<ActaReport> {
     totalPersoneros: personeros?.length ?? 0,
     conActa: rowsConActa.length,
     sinActa: rowsSinActa.length,
+    incompletas: rowsIncompletas.length,
     rowsConActa,
     rowsSinActa,
+    rowsIncompletas,
   };
 }

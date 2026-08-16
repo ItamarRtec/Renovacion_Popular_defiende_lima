@@ -31,7 +31,7 @@ export default async function RegistroListoPage() {
         body { background: #ffffff !important; color: #0b2a36; }
       `}</style>
       <div className="theme-rp flex min-h-full flex-1 flex-col bg-white text-[#0b2a36]">
-        <header className="dl-nav">
+        <header className="dl-nav no-print">
           <div className="dl-container flex h-[3.25rem] items-center justify-between gap-4">
             <Link
               className="inline-flex items-center gap-2 text-[13px] font-semibold tracking-tight"

@@ -7,6 +7,7 @@ type CheckInBody = {
   token?: string;
   registroId?: string;
   metodo?: "qr" | "manual";
+  eventoId?: string;
 };
 
 export async function POST(request: NextRequest) {
@@ -57,9 +58,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "No autenticado." }, { status: 401 });
   }
 
+  const eventoId = body.eventoId?.trim() || "";
   const { data, error } = await supabase.rpc("registrar_asistencia", {
     p_registro_id: registroId,
     p_metodo: metodo,
+    ...(eventoId ? { p_evento_id: eventoId } : {}),
   });
 
   if (error) {
@@ -82,9 +85,9 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    if (msg.includes("no hay evento activo")) {
+    if (msg.includes("no hay evento activo") || msg.includes("evento invalido")) {
       return NextResponse.json(
-        { error: "No hay un evento abierto. Pide al admin que cree un ensayo." },
+        { error: "Ese evento no está activo. Elige otro o pide uno al admin." },
         { status: 403 },
       );
     }

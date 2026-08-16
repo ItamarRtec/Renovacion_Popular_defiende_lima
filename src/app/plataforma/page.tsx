@@ -36,15 +36,17 @@ export default async function PlataformaHomePage() {
         .eq("visto", true),
       supabase
         .from("actas")
-        .select("id")
-        .eq("registro_id", registro.id)
-        .limit(1),
+        .select("id, tipo")
+        .eq("registro_id", registro.id),
       renderPersoneroQrDataUrl(registro.id),
     ]);
 
   const totalVideos = videos?.length ?? 0;
   const vistos = progresos?.length ?? 0;
-  const hasActa = (actas?.length ?? 0) > 0;
+  const tiposActa = new Set((actas ?? []).map((a) => a.tipo));
+  const actasCargadas = ["instalacion_sufragio", "escrutinio"].filter((t) =>
+    tiposActa.has(t),
+  ).length;
 
   return (
     <section className="mx-auto max-w-2xl">
@@ -76,21 +78,50 @@ export default async function PlataformaHomePage() {
             <p className="mt-1 font-[family-name:var(--font-data)] tabular-nums text-[#1077A1]">
               Mesa {registro.numero_mesa?.trim() || "—"}
             </p>
-            <Link
-              className="mt-4 inline-block text-sm text-[#1077A1] underline underline-offset-2"
-              href="/plataforma/qr"
-            >
-              Ver en grande
-            </Link>
+            <div className="mt-5 flex flex-col gap-2">
+              <Link
+                className="dl-btn dl-btn-primary w-full"
+                href="/plataforma/credencial"
+              >
+                Ver credencial
+              </Link>
+              <Link
+                className="text-sm text-[#1077A1] underline underline-offset-2"
+                href="/plataforma/qr"
+              >
+                Ver QR en grande
+              </Link>
+            </div>
           </>
         ) : (
-          <p className="mt-4 text-sm text-muted">
-            No se pudo generar tu QR. Falta la clave de firma en el servidor.
-          </p>
+          <>
+            <p className="mt-4 text-sm text-muted">
+              No se pudo generar tu QR. Falta la clave de firma en el servidor.
+            </p>
+            <Link
+              className="dl-btn dl-btn-primary mt-5 w-full"
+              href="/plataforma/credencial"
+            >
+              Ver credencial
+            </Link>
+          </>
         )}
       </div>
 
       <div className="mt-10 space-y-4">
+        <Link
+          className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"
+          href="/plataforma/credencial"
+        >
+          <p className="text-xs uppercase tracking-wider text-muted">
+            Credencial
+          </p>
+          <p className="mt-2 text-lg font-medium">Ver y descargar</p>
+          <p className="mt-1 text-sm text-muted">
+            Documento de personero de mesa con tu QR
+          </p>
+        </Link>
+
         <Link
           className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"
           href="/plataforma/videos"
@@ -109,9 +140,9 @@ export default async function PlataformaHomePage() {
           className="dl-panel block px-5 py-5 transition hover:border-[rgb(16_119_161_/_0.36)]"
           href="/plataforma/acta"
         >
-          <p className="text-xs uppercase tracking-wider text-muted">Acta</p>
+          <p className="text-xs uppercase tracking-wider text-muted">Actas</p>
           <p className="mt-2 text-lg font-medium">
-            {hasActa ? "Foto cargada" : "Aún sin foto"}
+            {actasCargadas} de 2 cargadas
           </p>
           <p className="mt-1 text-sm text-muted">
             Mesa {registro.numero_mesa ?? "—"} ·{" "}

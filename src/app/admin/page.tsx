@@ -284,7 +284,7 @@ export default async function AdminPage() {
         </li>
         <li>
           <Link
-            href="/coordinacion/escanear"
+            href="/coordinacion/eventos"
             className="block rounded-lg border border-[rgb(16_119_161_/_0.16)] bg-white px-4 py-3 transition hover:border-[rgb(16_119_161_/_0.35)] hover:bg-[rgb(16_119_161_/_0.04)]"
           >
             <span className="font-medium text-[#0b2a36]">

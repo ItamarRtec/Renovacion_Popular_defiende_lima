@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { signCheckInToken } from "@/lib/checkin-token";
 import { consultarMesaPorDni } from "@/lib/onpe-consulta";
 import { clientIp } from "@/lib/rate-limit";
 import { verifyTurnstile } from "@/lib/turnstile";
@@ -251,8 +252,19 @@ export async function POST(request: Request) {
     }
   }
 
+  let qrToken: string | null = null;
+  if (inserted?.id) {
+    try {
+      qrToken = signCheckInToken(inserted.id);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return NextResponse.json({
     ok: true,
+    id: inserted?.id ?? null,
+    qrToken,
     rol_mesa: rolMesa,
     mesa: mesa
       ? {

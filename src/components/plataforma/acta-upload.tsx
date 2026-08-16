@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
+import { ACTA_TIPO_LABEL, type ActaTipo } from "@/lib/actas";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-type ActaView = {
+export type ActaView = {
   id: string;
   storage_path: string;
   created_at: string;
@@ -12,14 +13,17 @@ type ActaView = {
 
 export function ActaUpload({
   registroId,
+  tipo,
   initialActa,
 }: {
   registroId: string;
+  tipo: ActaTipo;
   initialActa: ActaView | null;
 }) {
   const [acta, setActa] = useState(initialActa);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const label = ACTA_TIPO_LABEL[tipo];
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -41,7 +45,7 @@ export function ActaUpload({
     try {
       const supabase = getSupabaseBrowserClient();
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${registroId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${registroId}/${tipo}/${crypto.randomUUID()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage
         .from("actas")
@@ -68,6 +72,7 @@ export function ActaUpload({
           registro_id: registroId,
           storage_path: path,
           origen: "web",
+          tipo,
         })
         .select("id, storage_path, created_at")
         .single();
@@ -97,19 +102,24 @@ export function ActaUpload({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="dl-panel space-y-5 px-5 py-5">
+      <div>
+        <p className="text-xs uppercase tracking-wider text-muted">Acta</p>
+        <h2 className="mt-1 text-lg font-medium text-[#0b2a36]">{label}</h2>
+      </div>
+
       {acta?.signedUrl ? (
         <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            alt="Foto del acta cargada"
-            className="max-h-[28rem] w-full object-contain bg-black"
+            alt={label}
+            className="max-h-[22rem] w-full object-contain bg-black"
             src={acta.signedUrl}
           />
         </div>
       ) : (
-        <div className="dl-panel flex min-h-48 items-center justify-center px-6 text-center text-sm text-muted">
-          Aún no hay foto del acta.
+        <div className="flex min-h-36 items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-border px-6 text-center text-sm text-muted">
+          Aún no hay foto de esta acta.
         </div>
       )}
 
@@ -119,7 +129,7 @@ export function ActaUpload({
             ? "Subiendo…"
             : acta
               ? "Reemplazar foto"
-              : "Subir foto del acta"}
+              : "Subir foto"}
           <input
             accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
             className="sr-only"
@@ -129,7 +139,7 @@ export function ActaUpload({
           />
         </label>
         <p className="mt-3 text-xs text-muted">
-          JPG, PNG o WEBP · máximo 10 MB. Solo tú y el equipo pueden verla.
+          JPG, PNG o WEBP · máximo 10 MB.
         </p>
       </div>
 

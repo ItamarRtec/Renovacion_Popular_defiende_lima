@@ -14,14 +14,22 @@ declare global {
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
+function isLocalTurnstileBypass() {
+  if (process.env.NODE_ENV === "development") return true;
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname.toLowerCase();
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+}
+
 /**
  * Widget de Cloudflare Turnstile (CAPTCHA).
- * Si NEXT_PUBLIC_TURNSTILE_SITE_KEY no está configurada, no renderiza nada
- * (y el acceso no exige token: útil en desarrollo).
+ * En localhost / `next dev` no se muestra, aunque la site key esté en .env.local.
  */
 export function Turnstile({ onToken }: { onToken: (token: string | null) => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const siteKey = isLocalTurnstileBypass()
+    ? undefined
+    : process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const onTokenRef = useRef(onToken);
 
   useEffect(() => {
@@ -77,5 +85,6 @@ export function Turnstile({ onToken }: { onToken: (token: string | null) => void
 }
 
 export function turnstileConfigured(): boolean {
+  if (isLocalTurnstileBypass()) return false;
   return Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 }

@@ -73,8 +73,8 @@ export default async function CoordinacionHomePage() {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link className="dl-btn dl-btn-primary" href="/coordinacion/escanear">
-          Escanear asistencia
+        <Link className="dl-btn dl-btn-primary" href="/coordinacion/eventos">
+          Registrar evento
         </Link>
         <Link
           className="dl-btn dl-btn-secondary"

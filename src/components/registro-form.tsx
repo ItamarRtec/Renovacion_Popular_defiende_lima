@@ -35,6 +35,7 @@ type RegistroFormProps = {
 type MesaResult = {
   numero_mesa?: string | null;
   centro_votacion?: string | null;
+  provincia?: string | null;
   distrito?: string | null;
 };
 
@@ -161,6 +162,8 @@ export function RegistroForm({
       const payload = (await response.json()) as {
         ok?: boolean;
         error?: string;
+        id?: string | null;
+        qrToken?: string | null;
         mesa?: MesaResult | null;
         rol_mesa?: RolMesaResult;
       };
@@ -179,8 +182,11 @@ export function RegistroForm({
           apellidos,
           dni,
           telefono,
+          id: payload.id ?? null,
+          qrToken: payload.qrToken ?? null,
           numero_mesa: payload.mesa?.numero_mesa ?? null,
           centro_votacion: payload.mesa?.centro_votacion ?? null,
+          provincia: payload.mesa?.provincia ?? null,
           distrito: payload.mesa?.distrito ?? null,
           rol_mesa: payload.rol_mesa ?? "titular",
         };

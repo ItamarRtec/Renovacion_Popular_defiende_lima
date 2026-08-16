@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type PersoneroQrProps = {
   dataUrl: string;
   mesa: string | null;
@@ -45,6 +47,9 @@ export function PersoneroQr({
         <p className="mt-1 font-[family-name:var(--font-data)] text-lg tabular-nums text-[#1077A1]">
           Mesa {mesa?.trim() || "—"}
         </p>
+        <Link className="dl-btn dl-btn-primary mt-5 w-full" href="/plataforma/credencial">
+          Ver credencial
+        </Link>
       </div>
 
       <p className="mx-auto mt-6 max-w-xs text-xs leading-relaxed text-muted">

@@ -7,6 +7,11 @@ const NAV_GROUPS = [
     { href: "/plataforma", label: "Inicio", icon: "home" as const },
     { href: "/plataforma/videos", label: "Videos", icon: "video" as const },
     { href: "/plataforma/qr", label: "Mi QR", icon: "qr" as const },
+    {
+      href: "/plataforma/credencial",
+      label: "Credencial",
+      icon: "id" as const,
+    },
     { href: "/plataforma/acta", label: "Acta", icon: "image" as const },
   ],
 ] as const;

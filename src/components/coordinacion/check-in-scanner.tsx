@@ -30,6 +30,8 @@ type TeamPersonero = {
 
 type CheckInScannerProps = {
   team: TeamPersonero[];
+  eventoId?: string;
+  eventoNombre?: string;
 };
 
 function formatHora(iso: string) {
@@ -43,7 +45,11 @@ function formatHora(iso: string) {
   }
 }
 
-export function CheckInScanner({ team }: CheckInScannerProps) {
+export function CheckInScanner({
+  team,
+  eventoId,
+  eventoNombre,
+}: CheckInScannerProps) {
   const scannerDomId = useId().replace(/:/g, "");
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const handlingRef = useRef(false);
@@ -74,7 +80,10 @@ export function CheckInScanner({ team }: CheckInScannerProps) {
     const res = await fetch("/api/asistencia/check-in", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        ...body,
+        ...(eventoId ? { eventoId } : {}),
+      }),
     });
     const data = (await res.json()) as CheckInResult & { error?: string };
     if (!res.ok) {
@@ -156,11 +165,13 @@ export function CheckInScanner({ team }: CheckInScannerProps) {
 
   return (
     <div className="mx-auto max-w-lg">
-      <p className="dl-kicker">Día de la elección</p>
-      <h1 className="dl-title mt-3 text-3xl">Escanear asistencia</h1>
+      <p className="dl-kicker">Asistencia</p>
+      <h1 className="dl-title mt-3 text-3xl">Registrar llegada</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">
-        Escanea el QR del personero o marca llegada por DNI. Queda la hora
-        exacta.
+        {eventoNombre
+          ? `Escanea el QR o marca el DNI para “${eventoNombre}”.`
+          : "Escanea el QR del personero o marca llegada por DNI."}{" "}
+        Queda la hora exacta.
       </p>
 
       {result ? (
