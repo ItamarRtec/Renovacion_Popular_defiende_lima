@@ -15,9 +15,12 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const adminAllowed = isAdminHostAllowed(request);
 
-  // Admin + ops: only localhost (or ALLOW_ADMIN=1). Public deploy → 404.
+  // Admin + ops: fuera de hosts permitidos → 404 HTML (no archivo vacío).
   if (isAdminSurfacePath(path) && !adminAllowed) {
-    return new NextResponse(null, { status: 404 });
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
   }
 
   const isAdminPanel =
