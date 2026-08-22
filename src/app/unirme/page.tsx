@@ -7,15 +7,15 @@ import { BRANDS } from "@/lib/brands";
 const brand = BRANDS.renovacion_popular;
 
 const PITCH = [
-  "Te capacitas con 3 videos cortos desde tu celular.",
-  "Tu local se confirma la 1.ª semana de septiembre por WhatsApp.",
-  "Cobras por Yape o Plin al enviar el acta.",
+  "Te capacitas con 3 videos cortos desde tu celular",
+  "Preséntate 7 am en tu local de votación",
+  "Cobras por Yape o Plin al entregar el acta de escrutinio de tu mesa de votación en físico a tu coordinador distrital",
 ] as const;
 
 export const metadata: Metadata = {
   title: "Sé nuestro personero — Renovación Popular",
   description:
-    "Elecciones municipales 2027. Domingo 4 de octubre de 2026. Si eres de Lima necesito tu apoyo.",
+    "Elecciones municipales 2027. Domingo 4 de octubre de 2026. Si votas en Lima necesito tu apoyo",
 };
 
 export default function UnirmePage() {
@@ -70,11 +70,11 @@ export default function UnirmePage() {
               </div>
               <p className="dl-kicker">Elecciones municipales 2027</p>
               <h1 className="dl-title mt-3 text-[clamp(2.25rem,6vw,3rem)]">
-                Sé nuestro personero.
+                Sé nuestro personero
               </h1>
               <p className="mx-auto mt-4 text-base leading-relaxed text-muted">
-                Si eres de Lima{" "}
-                <span className="dl-accent-underline">necesito tu apoyo</span>.
+                Si votas en Lima{" "}
+                <span className="dl-accent-underline">necesito tu apoyo</span>
               </p>
               <p className="mt-3 text-[14px] font-medium tracking-tight text-[#1077A1] sm:text-[15px]">
                 Domingo 4 de octubre de 2026

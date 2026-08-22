@@ -10,17 +10,16 @@ const STEPS = [
   {
     title: "Recibe tu mesa",
     description:
-      "Tu local se confirma la 1.ª semana de septiembre por WhatsApp.",
+      "Tu local se confirma la primera semana de septiembre por WhatsApp",
   },
   {
     title: "Defiende tu mesa",
-    description:
-      "Domingo 4 de octubre de 2026: cuidas el voto y mandas el acta.",
+    description: "Preséntate 7 am en tu local de votación",
   },
   {
     title: "Cobra por Yape o Plin",
     description:
-      "Validamos tu participación y cobras. Compensación garantizada.",
+      "Cobras por Yape o Plin al entregar el acta de escrutinio de tu mesa de votación en físico a tu coordinador distrital",
   },
 ] as const;
 

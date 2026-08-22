@@ -67,7 +67,7 @@ export function mensajePersoneroWhatsApp(opts: {
 export function mensajeInvitarAmigoWhatsApp(registerUrl: string) {
   return [
     "Oye, únete como personero de Renovación Popular.",
-    "Si eres de Lima, necesito tu apoyo.",
+    "Si votas en Lima necesito tu apoyo",
     `Regístrate aquí: ${registerUrl}`,
   ].join(" ");
 }

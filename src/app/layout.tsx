@@ -9,7 +9,7 @@ const mono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Sé nuestro personero — Renovación Popular",
-  description: "Si eres de Lima necesito tu apoyo.",
+  description: "Si votas en Lima necesito tu apoyo",
   icons: {
     icon: [
       {

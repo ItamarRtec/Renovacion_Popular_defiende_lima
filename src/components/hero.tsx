@@ -49,15 +49,15 @@ export function Hero({ brand }: HeroProps) {
             className="dl-animate-rise mt-3 max-w-[16ch] text-[clamp(2.75rem,8vw,4.25rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-balance text-[#0b2a36]"
             style={{ animationDelay: "110ms" }}
           >
-            Sé nuestro personero.
+            Sé nuestro personero
           </h1>
 
           <p
             className="dl-animate-rise mt-6 max-w-lg text-[17px] font-normal leading-[1.5] tracking-[-0.022em] text-muted sm:text-[19px]"
             style={{ animationDelay: "150ms" }}
           >
-            Si eres de Lima{" "}
-            <span className="dl-accent-underline">necesito tu apoyo</span>.
+            Si votas en Lima{" "}
+            <span className="dl-accent-underline">necesito tu apoyo</span>
           </p>
 
           <p

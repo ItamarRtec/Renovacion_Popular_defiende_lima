@@ -9,7 +9,7 @@ const brand = BRANDS.renovacion_popular;
 export const metadata: Metadata = {
   title: "Sé nuestro personero — Renovación Popular",
   description:
-    "Elecciones municipales 2027. Domingo 4 de octubre de 2026. Si eres de Lima necesito tu apoyo.",
+    "Elecciones municipales 2027. Domingo 4 de octubre de 2026. Si votas en Lima necesito tu apoyo",
 };
 
 export default function HomePage() {
