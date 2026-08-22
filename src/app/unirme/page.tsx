@@ -112,8 +112,8 @@ export default function UnirmePage() {
                 }}
                 origen={brand.origen}
                 placeholders={{
-                  nombres: "María Elena",
-                  apellidos: "Fernández Quispe",
+                  nombres: "",
+                  apellidos: "",
                   dni: "8 dígitos",
                   telefono: "9 dígitos",
                   email: "nombre@correo.com",

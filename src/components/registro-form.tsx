@@ -108,8 +108,8 @@ export function RegistroForm({
     email: labels?.email ?? "Correo electrónico",
   };
   const fieldPlaceholders = {
-    nombres: placeholders?.nombres ?? "María Elena",
-    apellidos: placeholders?.apellidos ?? "Quispe Rojas",
+    nombres: placeholders?.nombres ?? "",
+    apellidos: placeholders?.apellidos ?? "",
     dni: placeholders?.dni ?? "12345678",
     telefono: placeholders?.telefono ?? "999 888 777",
     email: placeholders?.email ?? "tu@correo.com",
