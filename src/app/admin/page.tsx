@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CredencialesToggle } from "@/components/admin/credenciales-toggle";
+import { DiaDToggle } from "@/components/admin/dia-d-toggle";
 import { getAdminBalanceStats } from "@/lib/admin-stats";
 import {
   getAdminControlCenter,
@@ -120,11 +121,12 @@ export default async function AdminPage() {
     getAdminBalanceStats(supabase),
     supabase
       .from("plataforma_flags")
-      .select("credenciales_visibles")
+      .select("credenciales_visibles, dia_d")
       .eq("id", 1)
       .maybeSingle(),
   ]);
   const credencialesVisibles = flags.data?.credenciales_visibles ?? false;
+  const diaD = flags.data?.dia_d ?? false;
 
   const cobertura =
     ops.personerosTitulares - ops.sinMesa > 0
@@ -144,6 +146,7 @@ export default async function AdminPage() {
       </p>
 
       <CredencialesToggle visible={credencialesVisibles} />
+      <DiaDToggle activo={diaD} />
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

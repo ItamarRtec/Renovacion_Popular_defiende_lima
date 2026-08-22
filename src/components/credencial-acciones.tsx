@@ -14,14 +14,11 @@ export function CredencialAcciones({
   qrToken?: string | null;
   qrDataUrl?: string | null;
 }) {
-  const [qrDataUrl, setQrDataUrl] = useState<string | null>(qrDataUrlProp ?? null);
+  // Solo el QR generado en el cliente necesita estado; el del servidor se usa tal cual.
+  const [qrGenerado, setQrGenerado] = useState<string | null>(null);
 
   useEffect(() => {
-    if (qrDataUrlProp) {
-      setQrDataUrl(qrDataUrlProp);
-      return;
-    }
-    if (!qrToken) return;
+    if (qrDataUrlProp || !qrToken) return;
     let cancelled = false;
     void QRCode.toDataURL(qrToken, {
       errorCorrectionLevel: "M",
@@ -29,12 +26,14 @@ export function CredencialAcciones({
       width: 240,
       color: { dark: "#000000", light: "#ffffff" },
     }).then((url) => {
-      if (!cancelled) setQrDataUrl(url);
+      if (!cancelled) setQrGenerado(url);
     });
     return () => {
       cancelled = true;
     };
   }, [qrToken, qrDataUrlProp]);
+
+  const qrDataUrl = qrDataUrlProp ?? qrGenerado;
 
   return (
     <div className="credencial-wrap overflow-x-auto">

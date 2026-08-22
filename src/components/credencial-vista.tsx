@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CredencialAcciones } from "@/components/credencial-acciones";
 import { credencialFromRegistro, tituloCredencial } from "@/lib/credencial";
 import { credencialesVisibles } from "@/lib/credencial-visible";
+import { diaDActivo } from "@/lib/dia-d";
 import { renderPersoneroQrDataUrl } from "@/lib/personero-qr";
 import type { RegistroRow } from "@/lib/supabase/database.types";
 
@@ -12,9 +13,12 @@ export async function CredencialVista({
   registro: RegistroRow | null;
   homeHref: string;
 }) {
-  const mostrar = await credencialesVisibles();
+  const [mostrar, diaD] = await Promise.all([
+    credencialesVisibles(),
+    diaDActivo(),
+  ]);
 
-  if (!mostrar) {
+  if (!mostrar && !diaD) {
     return (
       <section className="mx-auto max-w-lg text-center">
         <p className="dl-kicker">Credencial</p>

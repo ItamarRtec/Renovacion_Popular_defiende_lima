@@ -40,5 +40,5 @@ Fuente: `src/app/globals.css` (`--dl-*`, `.dl-*`). No hex sueltos en JSX salvo d
 1. Mirar x.ai + paleta `/design-system`
 2. Una sección = un propósito + título + lede
 3. Tokens existentes; si faltan, documentarlos en la paleta
-4. Schema nuevo → migración en `supabase/migrations/`
+4. Schema nuevo → migración en `../supabase/migrations/` (fuera de `front_end/`; nunca crear `front_end/supabase/`)
 5. `npm run lint`

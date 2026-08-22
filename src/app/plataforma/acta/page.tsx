@@ -2,16 +2,25 @@ import { redirect } from "next/navigation";
 import { ActaUpload } from "@/components/plataforma/acta-upload";
 import {
   ACTA_TIPOS,
+  ACTA_TIPO_LABEL,
   isActaTipo,
   normalizeNumeroMesa,
   type ActaTipo,
 } from "@/lib/actas";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
-export default async function PlataformaActaPage() {
+type PageProps = {
+  searchParams: Promise<{ tipo?: string }>;
+};
+
+export default async function PlataformaActaPage({ searchParams }: PageProps) {
   const { registro } = await getSessionRegistro();
   if (!registro) redirect("/plataforma");
+
+  const { tipo: tipoParam } = await searchParams;
+  const soloTipo = isActaTipo(tipoParam) ? tipoParam : null;
 
   const mesaNorm = normalizeNumeroMesa(registro.numero_mesa);
   const supabase = await createSupabaseServerClient();
@@ -56,17 +65,31 @@ export default async function PlataformaActaPage() {
     }),
   );
 
+  const visibles = soloTipo
+    ? initial.filter((row) => row.tipo === soloTipo)
+    : initial;
+
   return (
     <section className="mx-auto max-w-2xl">
       <p className="dl-kicker">Evidencia</p>
-      <h1 className="dl-title mt-3 text-3xl">Actas de tu mesa</h1>
+      <h1 className="dl-title mt-3 text-3xl">
+        {soloTipo ? ACTA_TIPO_LABEL[soloTipo] : "Actas de tu mesa"}
+      </h1>
       <p className="mt-3 text-sm text-muted">
-        Sube las dos fotos
-        {registro.numero_mesa ? ` de la mesa ${registro.numero_mesa}` : ""}:
-        instalación y sufragio, y escrutinio.
+        {soloTipo
+          ? `Toma o sube la foto${registro.numero_mesa ? ` de la mesa ${registro.numero_mesa}` : ""}.`
+          : `Sube las dos fotos${registro.numero_mesa ? ` de la mesa ${registro.numero_mesa}` : ""}: instalación y sufragio, y escrutinio.`}
       </p>
+      {soloTipo ? (
+        <Link
+          className="mt-4 inline-block text-sm text-[#1077A1] underline underline-offset-2"
+          href="/plataforma"
+        >
+          Volver
+        </Link>
+      ) : null}
       <div className="mt-10 space-y-6">
-        {initial.map(({ tipo, acta }) => (
+        {visibles.map(({ tipo, acta }) => (
           <ActaUpload
             key={tipo}
             numeroMesa={mesaNorm}

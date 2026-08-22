@@ -109,11 +109,11 @@ export default function UnirmePage() {
                 footerNote="Toma menos de 1 minuto. Tus datos solo se usan para este proceso."
                 homeHref={brand.homeHref}
                 labels={{
-                  nombres: "Tu nombre",
+                  nombres: "Tus nombres",
                   apellidos: "Tus apellidos",
                   dni: "Tu DNI",
                   telefono: "Tu celular (WhatsApp)",
-                  email: "Tu correo",
+                  email: "Tu correo electrónico",
                 }}
                 origen={brand.origen}
                 placeholders={{

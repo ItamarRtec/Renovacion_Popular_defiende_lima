@@ -1,6 +1,7 @@
 import { isAdminRole, isCoordinadorDistrital } from "@/lib/roles";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { RegistroRow } from "@/lib/supabase/database.types";
+import type { ActaRef } from "@/lib/personero-alertas";
 
 function mergeById(rows: RegistroRow[]): RegistroRow[] {
   const byId = new Map<string, RegistroRow>();
@@ -86,4 +87,65 @@ export async function loadTeamPersoneros(
   ]);
 
   return mergeById([...(territorial ?? []), ...(manual ?? [])]);
+}
+
+export type TeamOperacion = {
+  personeros: RegistroRow[];
+  totalVideos: number;
+  vistosByRegistro: Map<string, number>;
+  actas: ActaRef[];
+  asistenciaById: Map<string, string>;
+};
+
+export async function loadTeamOperacion(
+  me: RegistroRow,
+  rol: string,
+): Promise<TeamOperacion> {
+  const personeros = await loadTeamPersoneros(me, rol);
+  const ids = personeros.map((row) => row.id);
+  const supabase = await createSupabaseServerClient();
+
+  const [{ data: videos }, { data: progresos }, { data: actas }, { data: asistencias }] =
+    await Promise.all([
+      supabase.from("videos").select("id").eq("activo", true),
+      ids.length
+        ? supabase
+            .from("video_progresos")
+            .select("registro_id, visto")
+            .in("registro_id", ids)
+            .eq("visto", true)
+        : Promise.resolve({ data: [] as { registro_id: string; visto: boolean }[] }),
+      ids.length
+        ? supabase
+            .from("actas")
+            .select("registro_id, tipo, numero_mesa")
+            .in("registro_id", [...ids, me.id])
+        : Promise.resolve({ data: [] as ActaRef[] }),
+      ids.length
+        ? supabase
+            .from("asistencias")
+            .select("registro_id, llegada_at")
+            .in("registro_id", ids)
+        : Promise.resolve({
+            data: [] as { registro_id: string; llegada_at: string }[],
+          }),
+    ]);
+
+  const vistosByRegistro = new Map<string, number>();
+  for (const row of progresos ?? []) {
+    vistosByRegistro.set(
+      row.registro_id,
+      (vistosByRegistro.get(row.registro_id) ?? 0) + 1,
+    );
+  }
+
+  return {
+    personeros,
+    totalVideos: videos?.length ?? 0,
+    vistosByRegistro,
+    actas: (actas ?? []) as ActaRef[],
+    asistenciaById: new Map(
+      (asistencias ?? []).map((row) => [row.registro_id, row.llegada_at]),
+    ),
+  };
 }

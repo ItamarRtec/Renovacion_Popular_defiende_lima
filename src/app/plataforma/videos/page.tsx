@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import { VideoList } from "@/components/plataforma/video-list";
+import { diaDActivo } from "@/lib/dia-d";
 import { getSessionRegistro } from "@/lib/plataforma";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function PlataformaVideosPage() {
   const { registro } = await getSessionRegistro();
   if (!registro) redirect("/plataforma");
+  if (await diaDActivo()) redirect("/plataforma");
 
   const supabase = await createSupabaseServerClient();
   const [{ data: videos }, { data: progresos }] = await Promise.all([

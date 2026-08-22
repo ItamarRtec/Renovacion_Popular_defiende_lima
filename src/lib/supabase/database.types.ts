@@ -115,6 +115,7 @@ export type DominioAccesoInsert = {
 export type PlataformaFlagsRow = {
   id: number;
   credenciales_visibles: boolean;
+  dia_d: boolean;
   updated_at: string;
 };
 
@@ -240,7 +241,9 @@ export type Database = {
       plataforma_flags: {
         Row: PlataformaFlagsRow;
         Insert: Partial<PlataformaFlagsRow>;
-        Update: Partial<Pick<PlataformaFlagsRow, "credenciales_visibles">>;
+        Update: Partial<
+          Pick<PlataformaFlagsRow, "credenciales_visibles" | "dia_d">
+        >;
         Relationships: [];
       };
       dominios_acceso: {
@@ -308,6 +311,10 @@ export type Database = {
         Returns: boolean;
       };
       credenciales_visibles: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      dia_d_activo: {
         Args: Record<string, never>;
         Returns: boolean;
       };
