@@ -44,14 +44,9 @@ export default function UnirmePage() {
                 {brand.name}
               </span>
             </Link>
-            <div className="flex items-center gap-3">
-              <Link className="dl-nav-link" href="/entrar">
-                Entrar
-              </Link>
-              <Link className="dl-nav-link" href={brand.howHref}>
-                Cómo funciona
-              </Link>
-            </div>
+            <Link className="dl-nav-link" href={brand.howHref}>
+              Cómo funciona
+            </Link>
           </div>
         </header>
 

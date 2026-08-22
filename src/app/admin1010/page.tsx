@@ -44,12 +44,6 @@ export default async function Admin1010Page() {
               />
               <span className="hidden sm:inline">{rp.name}</span>
             </Link>
-            <Link
-              className="text-sm text-muted hover:text-[#1077A1]"
-              href="/entrar"
-            >
-              Entrar
-            </Link>
           </div>
         </header>
 

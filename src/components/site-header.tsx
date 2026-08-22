@@ -55,9 +55,6 @@ export function SiteHeader({ brand }: SiteHeaderProps) {
         </nav>
 
         <div className="flex items-center justify-end gap-2">
-          <Link className="dl-btn dl-btn-secondary dl-btn-sm" href="/entrar">
-            Entrar
-          </Link>
           <Link className="dl-btn dl-btn-primary dl-btn-sm" href={brand.registerHref}>
             {brand.id === "renovacion_popular" ? "Sé nuestro personero" : "Unirme"}{" "}
             <Chevron />
